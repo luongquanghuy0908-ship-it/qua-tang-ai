@@ -32,6 +32,8 @@ body{
   font:400 16px/1.6 "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
   padding-bottom:calc(84px + env(safe-area-inset-bottom,0px));
 }
+body:has(#bar[hidden]){padding-bottom:0
+}
 a{color:inherit}
 img{max-width:100%}
 [hidden]{display:none!important}
@@ -149,7 +151,7 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
 <div class="wrap">
   <header class="top">
     <div class="brand"><i aria-hidden="true"></i>Quà Tặng Video AI</div>
-    <a class="yt-mini" href="https://www.youtube.com/@tramaiviet" target="_blank" rel="noopener">
+    <a class="yt-mini" id="ytTop" hidden href="https://www.youtube.com/@tramaiviet" target="_blank" rel="noopener">
       <svg viewBox="0 0 28 20" aria-hidden="true"><rect width="28" height="20" rx="5" fill="#E62117"/><path d="M11 5.5v9l8-4.5z" fill="#fff"/></svg>
       Kênh YouTube
     </a>
@@ -234,6 +236,7 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     </div>
   </section>
 
+  <div id="after" hidden>
   <section class="zalo" aria-labelledby="zaloTitle">
     <div>
       <h2 id="zaloTitle">Hết lượt tạo video giữa chừng? Vào nhóm Zalo.</h2>
@@ -281,10 +284,12 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     </details>
   </section>
 
+  </div>
+
   <footer>© 2026 Quà Tặng Video AI · <a href="https://www.youtube.com/@tramaiviet" target="_blank" rel="noopener">YouTube @tramaiviet</a></footer>
 </div>
 
-<div class="bar" role="region" aria-label="Liên hệ Zalo">
+<div class="bar" id="bar" role="region" aria-label="Liên hệ Zalo" hidden>
   <div class="inner">
     <div class="txt">Cần tài khoản AI tạo video không giới hạn?</div>
     <a class="btn" href="https://zalo.me/g/enu2k2n5h6fmli8womh6" target="_blank" rel="noopener">Vào Zalo</a>
@@ -300,7 +305,6 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     i:"https://flow.google.com/shared/tool/958e5cc5-1e6c-4560-b3bd-c4e98499748b",
     p:"https://1drv.ms/w/c/f069d7cd408eefa7/IQCe7RW2rjUpSIFbhgw0eNcAASIWOZQgfn6iVgOkGiarTPo?e=qIbGNG"
   };
-  var KEY = "qua-tang-ai-unlocked";
 
   var form = document.getElementById("leadForm");
   var btn = document.getElementById("submitBtn");
@@ -328,6 +332,7 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     document.getElementById("gate").hidden = true;
     var r = document.getElementById("reward");
     r.hidden = false;
+    ["after","bar","ytTop"].forEach(function(id){ document.getElementById(id).hidden = false; });
     r.scrollIntoView({ behavior:"smooth", block:"start" });
   }
 
@@ -353,12 +358,10 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     btn.disabled = true;
     btn.firstChild.textContent = "Đang mở khoá… ";
     send(data).then(function(){
-      try { localStorage.setItem(KEY, data.name); } catch (e) {}
       unlock(data.name);
     });
   });
 
-  try { var saved = localStorage.getItem(KEY); if (saved) unlock(saved); } catch (e) {}
 })();
 </script>
 </body>
