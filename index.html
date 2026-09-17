@@ -320,7 +320,7 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     var mail = f.mail.value.trim().toLowerCase();
 
     if (name.length < 2) { setErr("name","Nhập họ tên của bạn."); ok = false; } else setErr("name","");
-    if (!/^(0|\+?84)(3|5|7|8|9)\d{8}$/.test(phone)) { setErr("phone","Số điện thoại chưa đúng, ví dụ 0912345678."); ok = false; } else setErr("phone","");
+    if (!/^(0|\+?84)\d{9,10}$/.test(phone)) { setErr("phone","Số điện thoại chưa đúng, ví dụ 0912345678."); ok = false; } else setErr("phone","");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { setErr("mail","Gmail chưa đúng, ví dụ ban@gmail.com."); ok = false; } else setErr("mail","");
 
     return ok ? { name:name, phone:phone, mail:mail } : null;
@@ -337,18 +337,25 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
   }
 
   function send(data){
-    var body = new URLSearchParams();
-    body.append(ENTRY.name, data.name);
-    body.append(ENTRY.phone, "'" + data.phone);
-    body.append(ENTRY.mail, data.mail);
-    try {
-      return fetch(FORM_URL, { method:"POST", mode:"no-cors", body:body, keepalive:true }).catch(function(){
-        if (navigator.sendBeacon) navigator.sendBeacon(FORM_URL, body);
-      });
-    } catch (e) {
-      if (navigator.sendBeacon) navigator.sendBeacon(FORM_URL, body);
-      return Promise.resolve();
-    }
+    return new Promise(function(done){
+      var finished = false;
+      function fin(){ if (!finished) { finished = true; done(); } }
+      setTimeout(fin, 1500);
+      try {
+        var name = "gf" + Date.now();
+        var frame = document.createElement("iframe");
+        frame.name = name; frame.hidden = true; frame.setAttribute("aria-hidden", "true");
+        document.body.appendChild(frame);
+        var fm = document.createElement("form");
+        fm.method = "POST"; fm.action = FORM_URL; fm.target = name; fm.hidden = true;
+        [[ENTRY.name, data.name], [ENTRY.phone, "'" + data.phone], [ENTRY.mail, data.mail]].forEach(function(p){
+          var i = document.createElement("input"); i.type = "hidden"; i.name = p[0]; i.value = p[1]; fm.appendChild(i);
+        });
+        document.body.appendChild(fm);
+        frame.addEventListener("load", function(){ setTimeout(fin, 200); });
+        fm.submit();
+      } catch (e) { fin(); }
+    });
   }
 
   form.addEventListener("submit", function(e){
