@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quà Tặng Video AI</title>
+<meta name="description" content="Điền 3 thông tin để nhận miễn phí tool tạo video AI, tool tạo ảnh AI và bộ prompt tạo video trên Google Flow.">
+<meta property="og:title" content="Nhận miễn phí bộ công cụ tạo video & ảnh AI">
+<meta property="og:description" content="Tool tạo video AI + tool tạo ảnh AI + bộ prompt — mở khoá chỉ trong 30 giây.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;800;900&display=swap">
+<style>
+:root{
+  --ink:#0B1B33;
+  --ink-soft:#44516A;
+  --ground:#EEF3FA;
+  --paper:#FFFFFF;
+  --line:#D6DFEC;
+  --zalo:#0068FF;
+  --zalo-deep:#0050C8;
+  --gift:#FFD23F;
+  --yt:#E62117;
+  --ok:#0E9F6E;
+  --err:#C8321E;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--ground);color:var(--ink);
+  font:400 16px/1.6 "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  padding-bottom:calc(84px + env(safe-area-inset-bottom,0px));
+}
+a{color:inherit}
+img{max-width:100%}
+[hidden]{display:none!important}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:20px}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:16px}
+.brand{font-weight:900;letter-spacing:-.01em;font-size:17px;display:flex;align-items:center;gap:8px}
+.brand i{display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--zalo);box-shadow:5px 5px 0 var(--gift)}
+.yt-mini{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:600;font-size:14px;padding:8px 12px;border-radius:999px;background:var(--paper);border:1px solid var(--line)}
+.yt-mini svg{width:20px;height:14px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:start;padding-block:24px 48px}
+.tag{display:inline-block;background:var(--gift);color:var(--ink);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:6px;transform:rotate(-1.5deg)}
+h1{font-weight:900;font-size:clamp(34px,5.4vw,58px);line-height:1.05;letter-spacing:-.03em;margin:18px 0 16px;text-wrap:balance}
+h1 mark{background:none;color:var(--zalo);position:relative;white-space:nowrap}
+h1 mark::after{content:"";position:absolute;left:0;right:0;bottom:.02em;height:.18em;background:var(--gift);z-index:-1;border-radius:3px}
+.lead{font-size:18px;color:var(--ink-soft);max-width:34em;margin:0 0 28px}
+
+.gifts{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.gift{display:grid;grid-template-columns:52px 1fr;gap:14px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.gift .ic{width:52px;height:52px;border-radius:12px;display:grid;place-items:center;background:var(--ground)}
+.gift .ic svg{width:26px;height:26px;stroke:var(--zalo);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gift b{display:block;font-weight:800;font-size:16px}
+.gift span{color:var(--ink-soft);font-size:14px}
+
+/* form card */
+.card{background:var(--paper);border-radius:20px;padding:28px;border:2px solid var(--ink);box-shadow:8px 8px 0 var(--ink);position:sticky;top:20px}
+.card h2{margin:0 0 6px;font-size:24px;font-weight:900;letter-spacing:-.02em}
+.card p.sub{margin:0 0 20px;color:var(--ink-soft);font-size:15px}
+.field{display:grid;gap:6px;margin-bottom:14px}
+.field label{font-weight:600;font-size:14px}
+.field input{font:inherit;font-size:16px;padding:13px 14px;border-radius:10px;border:1.5px solid var(--line);background:#F8FAFD;color:var(--ink);width:100%}
+.field input:focus{outline:none;border-color:var(--zalo);box-shadow:0 0 0 3px rgba(0,104,255,.18);background:#fff}
+.field input[aria-invalid="true"]{border-color:var(--err)}
+.field .msg{font-size:13px;color:var(--err);min-height:0}
+.btn{appearance:none;border:0;cursor:pointer;font:inherit;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px 18px;border-radius:12px;background:var(--zalo);color:#fff;text-decoration:none;transition:transform .15s ease,background .15s ease}
+.btn:hover{background:var(--zalo-deep)}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible,.yt-mini:focus-visible,.link-btn:focus-visible{outline:3px solid var(--gift);outline-offset:2px}
+.btn[disabled]{opacity:.7;cursor:progress}
+.fine{font-size:12.5px;color:var(--ink-soft);margin:12px 0 0;text-align:center}
+
+/* reward */
+.reward{padding-block:8px 48px}
+.unlocked{display:flex;align-items:center;gap:10px;color:var(--ok);font-weight:800;font-size:14px;letter-spacing:.06em;text-transform:uppercase}
+.unlocked svg{width:20px;height:20px}
+.reward h2{font-size:clamp(28px,4vw,40px);font-weight:900;letter-spacing:-.02em;line-height:1.15;margin:8px 0 24px;text-wrap:balance}
+.r-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.r-item{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:10px}
+.r-item .no{font-size:13px;font-weight:800;color:var(--zalo);letter-spacing:.06em;text-transform:uppercase}
+.r-item h3{margin:0;font-size:19px;font-weight:800}
+.r-item p{margin:0;color:var(--ink-soft);font-size:14.5px;flex:1}
+.link-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 14px;border-radius:10px;font-weight:700;text-decoration:none;background:var(--ink);color:#fff}
+.link-btn:hover{background:#1d3257}
+
+/* zalo block */
+.zalo{margin-block:40px;background:var(--zalo);color:#fff;border-radius:24px;padding:36px;display:grid;grid-template-columns:1.2fr .8fr;gap:32px;align-items:center;position:relative;overflow:hidden}
+.zalo::before{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.08)}
+.zalo h2{margin:0 0 12px;font-size:clamp(26px,3.6vw,36px);font-weight:900;line-height:1.15;letter-spacing:-.02em;text-wrap:balance}
+.zalo ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.zalo li{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start}
+.zalo li svg{width:22px;height:22px;margin-top:2px}
+.zalo .cta{display:grid;gap:12px;position:relative}
+.btn-gift{background:var(--gift);color:var(--ink)}
+.btn-gift:hover{background:#ffdc66}
+.zalo .note{font-size:13px;opacity:.85;text-align:center;margin:0}
+
+/* youtube */
+.yt{display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+.yt .logo{width:56px;height:40px}
+.yt h3{margin:0 0 4px;font-size:19px;font-weight:800}
+.yt p{margin:0;color:var(--ink-soft);font-size:14.5px}
+.btn-yt{background:var(--yt);width:auto;padding:13px 18px;font-size:15px}
+.btn-yt:hover{background:#c41c13}
+
+/* faq */
+.faq{padding-block:40px 24px;max-width:760px}
+.faq h2{font-size:26px;font-weight:900;margin:0 0 16px}
+details{border-bottom:1px solid var(--line);padding-block:14px}
+summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-weight:800;color:var(--zalo)}
+details[open] summary::after{content:"–"}
+details p{margin:10px 0 0;color:var(--ink-soft)}
+footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center}
+
+/* sticky zalo bar */
+.bar{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line);z-index:10}
+.bar .inner{max-width:1080px;margin:0 auto;display:flex;gap:12px;align-items:center}
+.bar .txt{flex:1;font-size:14px;font-weight:600;line-height:1.3}
+.bar .btn{width:auto;padding:12px 18px;font-size:15px;white-space:nowrap}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr;gap:28px}
+  .card{position:static;box-shadow:6px 6px 0 var(--ink)}
+  .r-grid{grid-template-columns:1fr}
+  .zalo{grid-template-columns:1fr;padding:28px 22px}
+  .yt{grid-template-columns:auto 1fr}
+  .yt .btn-yt{grid-column:1/-1;width:100%}
+}
+@media (max-width:420px){
+  .wrap{padding-inline:16px}
+  .card{padding:22px 18px}
+  .bar .txt{font-size:13px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@keyframes pop{from{transform:translateY(8px);opacity:.4}to{transform:none;opacity:1}}
+.reward:not([hidden]){animation:pop .4s ease-out}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><i aria-hidden="true"></i>Quà Tặng Video AI</div>
+    <a class="yt-mini" href="https://www.youtube.com/@tramaiviet" target="_blank" rel="noopener">
+      <svg viewBox="0 0 28 20" aria-hidden="true"><rect width="28" height="20" rx="5" fill="#E62117"/><path d="M11 5.5v9l8-4.5z" fill="#fff"/></svg>
+      Kênh YouTube
+    </a>
+  </header>
+
+  <section class="hero" id="gate">
+    <div>
+      <span class="tag">Miễn phí · Chạy trên Google Flow</span>
+      <h1>Làm video AI đẹp <mark>không cần biết dựng</mark></h1>
+      <p class="lead">Điền 3 thông tin bên cạnh là mở khoá liền 3 món quà: tool tạo video AI, tool tạo ảnh AI và bộ prompt tạo video soạn sẵn. Bấm vào là dùng, không phải cài gì.</p>
+
+      <ul class="gifts">
+        <li class="gift">
+          <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="m17 10 5-3v10l-5-3"/></svg></div>
+          <div><b>Tool tạo video AI</b><span>Gõ ý tưởng, tool dựng ra video — hợp làm Reels, TikTok, Shorts.</span></div>
+        </li>
+        <li class="gift">
+          <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></div>
+          <div><b>Tool tạo ảnh AI</b><span>Làm ảnh bìa, ảnh sản phẩm, ảnh nhân vật trong vài giây.</span></div>
+        </li>
+        <li class="gift">
+          <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></div>
+          <div><b>Bộ prompt tạo video</b><span>Câu lệnh soạn sẵn — copy dán vào là ra video, khỏi mò mẫm.</span></div>
+        </li>
+      </ul>
+    </div>
+
+    <form class="card" id="leadForm" novalidate>
+      <h2>Mở khoá quà tặng</h2>
+      <p class="sub">Mất chưa tới 30 giây. Quà hiện ra ngay trên trang này.</p>
+
+      <div class="field">
+        <label for="f-name">Họ và tên</label>
+        <input id="f-name" name="name" type="text" autocomplete="name" placeholder="Nguyễn Văn A" required>
+        <div class="msg" id="m-name"></div>
+      </div>
+      <div class="field">
+        <label for="f-phone">Số điện thoại (Zalo)</label>
+        <input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required>
+        <div class="msg" id="m-phone"></div>
+      </div>
+      <div class="field">
+        <label for="f-mail">Gmail</label>
+        <input id="f-mail" name="mail" type="email" inputmode="email" autocomplete="email" placeholder="ban@gmail.com" required>
+        <div class="msg" id="m-mail"></div>
+      </div>
+
+      <button class="btn" type="submit" id="submitBtn">
+        Nhận quà miễn phí
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </button>
+      <p class="fine">Thông tin chỉ dùng để gửi quà và hỗ trợ bạn, không chia sẻ cho bên khác.</p>
+    </form>
+  </section>
+
+  <section class="reward" id="reward" hidden aria-live="polite">
+    <div class="unlocked">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      Đã mở khoá
+    </div>
+    <h2 id="rewardTitle">Quà của bạn đây — bấm vào là dùng</h2>
+
+    <div class="r-grid">
+      <article class="r-item">
+        <span class="no">Quà 1</span>
+        <h3>Tool tạo video AI</h3>
+        <p>Mở bằng tài khoản Google của bạn. Gõ mô tả cảnh muốn làm, tool tự dựng video.</p>
+        <a class="link-btn" data-go="v" href="#" target="_blank" rel="noopener">Mở tool tạo video →</a>
+      </article>
+      <article class="r-item">
+        <span class="no">Quà 2</span>
+        <h3>Tool tạo ảnh AI</h3>
+        <p>Tạo ảnh bìa, ảnh minh hoạ, ảnh nhân vật để ghép vào video.</p>
+        <a class="link-btn" data-go="i" href="#" target="_blank" rel="noopener">Mở tool tạo ảnh →</a>
+      </article>
+      <article class="r-item">
+        <span class="no">Quà 3</span>
+        <h3>Bộ prompt tạo video</h3>
+        <p>Câu lệnh mẫu soạn sẵn. Copy, đổi vài chữ theo ý bạn rồi dán vào tool video.</p>
+        <a class="link-btn" data-go="p" href="#" target="_blank" rel="noopener">Xem bộ prompt →</a>
+      </article>
+    </div>
+  </section>
+
+  <section class="zalo" aria-labelledby="zaloTitle">
+    <div>
+      <h2 id="zaloTitle">Hết lượt tạo video giữa chừng? Vào nhóm Zalo.</h2>
+      <ul>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="#FFD23F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Tư vấn <b>tài khoản AI giá tốt</b> để tạo video thoải mái, không lo hết lượt.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="#FFD23F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Kẹt ở bước nào cứ hỏi trong nhóm, có người chỉ.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="#FFD23F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Cập nhật prompt và tool mới trước khi đăng lên kênh.</span></li>
+      </ul>
+    </div>
+    <div class="cta">
+      <a class="btn btn-gift" href="https://zalo.me/g/enu2k2n5h6fmli8womh6" target="_blank" rel="noopener">
+        Vào nhóm Zalo ngay
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+      <p class="note">Nhắn “MUA TÀI KHOẢN” trong nhóm để được báo giá.</p>
+    </div>
+  </section>
+
+  <section class="yt" aria-labelledby="ytTitle">
+    <svg class="logo" viewBox="0 0 28 20" aria-hidden="true"><rect width="28" height="20" rx="5" fill="#E62117"/><path d="M11 5.5v9l8-4.5z" fill="#fff"/></svg>
+    <div>
+      <h3 id="ytTitle">Xem hướng dẫn từng bước trên YouTube</h3>
+      <p>Cách dùng tool, cách viết prompt, mẹo làm video AI — có video mới đều đặn.</p>
+    </div>
+    <a class="btn btn-yt" href="https://www.youtube.com/@tramaiviet" target="_blank" rel="noopener">Đăng ký kênh</a>
+  </section>
+
+  <section class="faq" aria-labelledby="faqTitle">
+    <h2 id="faqTitle">Hỏi nhanh</h2>
+    <details>
+      <summary>Quà có mất phí không?</summary>
+      <p>Không. Bạn chỉ cần điền họ tên, số điện thoại và Gmail là mở khoá cả 3 món quà.</p>
+    </details>
+    <details>
+      <summary>Tool chạy trên gì, có phải cài không?</summary>
+      <p>Tool chạy trên Google Flow ngay trong trình duyệt, đăng nhập bằng tài khoản Google là dùng. Không phải cài phần mềm.</p>
+    </details>
+    <details>
+      <summary>Sao tạo được vài video thì báo hết lượt?</summary>
+      <p>Số lượt tạo phụ thuộc gói tài khoản Google bạn đang dùng. Muốn làm video đều tay mỗi ngày, vào nhóm Zalo để được tư vấn tài khoản phù hợp.</p>
+    </details>
+    <details>
+      <summary>Mua tài khoản AI ở đâu?</summary>
+      <p>Vào nhóm Zalo và nhắn “MUA TÀI KHOẢN”, sẽ có người báo giá và hướng dẫn cho bạn.</p>
+    </details>
+  </section>
+
+  <footer>© 2026 Quà Tặng Video AI · <a href="https://www.youtube.com/@tramaiviet" target="_blank" rel="noopener">YouTube @tramaiviet</a></footer>
+</div>
+
+<div class="bar" role="region" aria-label="Liên hệ Zalo">
+  <div class="inner">
+    <div class="txt">Cần tài khoản AI tạo video không giới hạn?</div>
+    <a class="btn" href="https://zalo.me/g/enu2k2n5h6fmli8womh6" target="_blank" rel="noopener">Vào Zalo</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  var FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSci6xa9kHs1Ct7NG5NdOmucHHqXWM1EK0GOU7-_5Cjs3bbMtg/formResponse";
+  var ENTRY = { name:"entry.1946046289", phone:"entry.2038919416", mail:"entry.961176542" };
+  var LINKS = {
+    v:"https://flow.google.com/shared/tool/a91b7c88-a507-45f1-813b-dbc9f68b0b6d",
+    i:"https://flow.google.com/shared/tool/958e5cc5-1e6c-4560-b3bd-c4e98499748b",
+    p:"https://1drv.ms/w/c/f069d7cd408eefa7/IQCe7RW2rjUpSIFbhgw0eNcAASIWOZQgfn6iVgOkGiarTPo?e=qIbGNG"
+  };
+  var KEY = "qua-tang-ai-unlocked";
+
+  var form = document.getElementById("leadForm");
+  var btn = document.getElementById("submitBtn");
+  var f = { name:document.getElementById("f-name"), phone:document.getElementById("f-phone"), mail:document.getElementById("f-mail") };
+  var m = { name:document.getElementById("m-name"), phone:document.getElementById("m-phone"), mail:document.getElementById("m-mail") };
+
+  function setErr(k, text){ m[k].textContent = text; f[k].setAttribute("aria-invalid", text ? "true" : "false"); }
+
+  function validate(){
+    var ok = true;
+    var name = f.name.value.trim().replace(/\s+/g," ");
+    var phone = f.phone.value.replace(/[\s.\-()]/g,"");
+    var mail = f.mail.value.trim().toLowerCase();
+
+    if (name.length < 2) { setErr("name","Nhập họ tên của bạn."); ok = false; } else setErr("name","");
+    if (!/^(0|\+?84)(3|5|7|8|9)\d{8}$/.test(phone)) { setErr("phone","Số điện thoại chưa đúng, ví dụ 0912345678."); ok = false; } else setErr("phone","");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { setErr("mail","Gmail chưa đúng, ví dụ ban@gmail.com."); ok = false; } else setErr("mail","");
+
+    return ok ? { name:name, phone:phone, mail:mail } : null;
+  }
+
+  function unlock(name){
+    document.querySelectorAll("[data-go]").forEach(function(a){ a.href = LINKS[a.getAttribute("data-go")]; });
+    if (name) document.getElementById("rewardTitle").textContent = "Quà của " + name.split(" ").pop() + " đây — bấm vào là dùng";
+    document.getElementById("gate").hidden = true;
+    var r = document.getElementById("reward");
+    r.hidden = false;
+    r.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  function send(data){
+    var body = new URLSearchParams();
+    body.append(ENTRY.name, data.name);
+    body.append(ENTRY.phone, "'" + data.phone);
+    body.append(ENTRY.mail, data.mail);
+    try {
+      return fetch(FORM_URL, { method:"POST", mode:"no-cors", body:body, keepalive:true }).catch(function(){
+        if (navigator.sendBeacon) navigator.sendBeacon(FORM_URL, body);
+      });
+    } catch (e) {
+      if (navigator.sendBeacon) navigator.sendBeacon(FORM_URL, body);
+      return Promise.resolve();
+    }
+  }
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    var data = validate();
+    if (!data) { var bad = form.querySelector('[aria-invalid="true"]'); if (bad) bad.focus(); return; }
+    btn.disabled = true;
+    btn.firstChild.textContent = "Đang mở khoá… ";
+    send(data).then(function(){
+      try { localStorage.setItem(KEY, data.name); } catch (e) {}
+      unlock(data.name);
+    });
+  });
+
+  try { var saved = localStorage.getItem(KEY); if (saved) unlock(saved); } catch (e) {}
+})();
+</script>
+</body>
+</html>
