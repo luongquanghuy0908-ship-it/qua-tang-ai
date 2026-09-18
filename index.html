@@ -91,6 +91,12 @@ h1 mark::after{content:"";position:absolute;left:0;right:0;bottom:.02em;height:.
 .r-item p{margin:0;color:var(--ink-soft);font-size:14.5px;flex:1}
 .link-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 14px;border-radius:10px;font-weight:700;text-decoration:none;background:var(--ink);color:#fff}
 .link-btn:hover{background:#1d3257}
+.guide{margin-top:20px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:grid;gap:14px}
+.guide .no{font-size:13px;font-weight:800;color:var(--yt);letter-spacing:.06em;text-transform:uppercase}
+.guide h3{margin:0;font-size:20px;font-weight:800}
+.guide .frame{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
+.guide iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.guide .btn-yt{justify-self:start}
 
 /* zalo block */
 .zalo{margin-block:40px;background:var(--zalo);color:#fff;border-radius:24px;padding:36px;display:grid;grid-template-columns:1.2fr .8fr;gap:32px;align-items:center;position:relative;overflow:hidden}
@@ -244,6 +250,13 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
         <a class="link-btn" data-go="p" href="#" target="_blank" rel="noopener">Xem bộ prompt →</a>
       </article>
     </div>
+
+    <div class="guide">
+      <span class="no">Video hướng dẫn</span>
+      <h3>Video hướng dẫn sử dụng tool</h3>
+      <div class="frame"><iframe id="guideVideo" data-src="https://www.youtube-nocookie.com/embed/N30OLG-8oKI" title="Video hướng dẫn sử dụng tool" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+      <a class="btn btn-yt" href="https://www.youtube.com/watch?v=N30OLG-8oKI" target="_blank" rel="noopener">Xem video hướng dẫn trên YouTube →</a>
+    </div>
   </section>
 
   <div id="after" hidden>
@@ -345,6 +358,8 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     document.getElementById("gate").hidden = true;
     var r = document.getElementById("reward");
     r.hidden = false;
+    var gv = document.getElementById("guideVideo");
+    if (gv && !gv.getAttribute("src")) gv.setAttribute("src", gv.getAttribute("data-src"));
     ["after","bar","ytTop","fbTop"].forEach(function(id){ document.getElementById(id).hidden = false; });
     r.scrollIntoView({ behavior:"smooth", block:"start" });
   }
