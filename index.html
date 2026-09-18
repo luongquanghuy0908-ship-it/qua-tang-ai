@@ -21,6 +21,7 @@
   --zalo-deep:#0050C8;
   --gift:#FFD23F;
   --yt:#E62117;
+  --fb:#1877F2;
   --ok:#0E9F6E;
   --err:#C8321E;
   --radius:14px;
@@ -110,6 +111,10 @@ h1 mark::after{content:"";position:absolute;left:0;right:0;bottom:.02em;height:.
 .yt p{margin:0;color:var(--ink-soft);font-size:14.5px}
 .btn-yt{background:var(--yt);width:auto;padding:13px 18px;font-size:15px}
 .btn-yt:hover{background:#c41c13}
+.btn-fb{background:var(--fb);width:auto;padding:13px 18px;font-size:15px}
+.btn-fb:hover{background:#0f5fc9}
+.yt .btns{display:flex;gap:10px;flex-wrap:wrap}
+.fb-mini svg{width:20px;height:20px}
 
 /* faq */
 .faq{padding-block:40px 24px;max-width:760px}
@@ -134,7 +139,8 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
   .r-grid{grid-template-columns:1fr}
   .zalo{grid-template-columns:1fr;padding:28px 22px}
   .yt{grid-template-columns:auto 1fr}
-  .yt .btn-yt{grid-column:1/-1;width:100%}
+  .yt .btns{grid-column:1/-1}
+  .yt .btns .btn{flex:1;justify-content:center}
 }
 @media (max-width:420px){
   .wrap{padding-inline:16px}
@@ -154,6 +160,10 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     <a class="yt-mini" id="ytTop" hidden href="https://www.youtube.com/@tramaiviet" target="_blank" rel="noopener">
       <svg viewBox="0 0 28 20" aria-hidden="true"><rect width="28" height="20" rx="5" fill="#E62117"/><path d="M11 5.5v9l8-4.5z" fill="#fff"/></svg>
       Kênh YouTube
+    </a>
+    <a class="yt-mini fb-mini" id="fbTop" hidden href="https://www.facebook.com/tramAIviet" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#1877F2"/><path d="M15.4 12.5h-2v6h-2.6v-6H9.3v-2.2h1.5V8.9c0-1.6 1-2.9 2.9-2.9h1.9v2.2h-1.3c-.5 0-.8.2-.8.8v1.3h2.2l-.3 2.2z" fill="#fff"/></svg>
+      Facebook
     </a>
   </header>
 
@@ -258,10 +268,13 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
   <section class="yt" aria-labelledby="ytTitle">
     <svg class="logo" viewBox="0 0 28 20" aria-hidden="true"><rect width="28" height="20" rx="5" fill="#E62117"/><path d="M11 5.5v9l8-4.5z" fill="#fff"/></svg>
     <div>
-      <h3 id="ytTitle">Xem hướng dẫn từng bước trên YouTube</h3>
-      <p>Cách dùng tool, cách viết prompt, mẹo làm video AI — có video mới đều đặn.</p>
+      <h3 id="ytTitle">Theo dõi để xem hướng dẫn từng bước</h3>
+      <p>Cách dùng tool, cách viết prompt, mẹo làm video AI — có bài mới đều đặn trên YouTube và Facebook.</p>
     </div>
-    <a class="btn btn-yt" href="https://www.youtube.com/@tramaiviet" target="_blank" rel="noopener">Đăng ký kênh</a>
+    <div class="btns">
+      <a class="btn btn-yt" href="https://www.youtube.com/@tramaiviet" target="_blank" rel="noopener">Đăng ký kênh</a>
+      <a class="btn btn-fb" href="https://www.facebook.com/tramAIviet" target="_blank" rel="noopener">Theo dõi Facebook</a>
+    </div>
   </section>
 
   <section class="faq" aria-labelledby="faqTitle">
@@ -332,7 +345,7 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     document.getElementById("gate").hidden = true;
     var r = document.getElementById("reward");
     r.hidden = false;
-    ["after","bar","ytTop"].forEach(function(id){ document.getElementById(id).hidden = false; });
+    ["after","bar","ytTop","fbTop"].forEach(function(id){ document.getElementById(id).hidden = false; });
     r.scrollIntoView({ behavior:"smooth", block:"start" });
   }
 
