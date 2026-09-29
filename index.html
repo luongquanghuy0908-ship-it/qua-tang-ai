@@ -2,6 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
+<meta name="theme-color" content="#0A192F">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tặng Miễn Phí Tool Video AI</title>
 <meta name="description" content="Điền 3 thông tin để nhận miễn phí tool tạo video AI, tool tạo ảnh AI và bộ prompt tạo video trên Google Flow.">
@@ -13,23 +14,27 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;800;900&display=swap">
 <style>
 :root{
-  --ink:#0B1B33;
-  --ink-soft:#44516A;
-  --ground:#EEF3FA;
-  --paper:#FFFFFF;
-  --line:#D6DFEC;
-  --zalo:#0068FF;
-  --zalo-deep:#0050C8;
-  --gift:#FFD23F;
+  --ink:#E2E8F0;
+  --ink-soft:#A9BBD6;
+  --ground:#0A192F;
+  --paper:#122A4D;
+  --field:#0D2242;
+  --line:#2B4A7B;
+  --zalo:#00F5D4;
+  --zalo-deep:#5CFFE6;
+  --onprimary:#06122E;
+  --gift:#9B6CFF;
+  --pink:#FF2E93;
   --yt:#E62117;
-  --ok:#0E9F6E;
-  --err:#C8321E;
+  --ok:#17D9A5;
+  --err:#FF6B8A;
   --radius:14px;
+  color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
 body{
-  background:var(--ground);color:var(--ink);
+  background:radial-gradient(900px 420px at 88% -6%,rgba(155,108,255,.30),transparent 70%),radial-gradient(800px 380px at 0% 0%,rgba(0,245,212,.16),transparent 65%),var(--ground);background-attachment:fixed;color:var(--ink);
   font:400 16px/1.6 "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
   padding-bottom:calc(84px + env(safe-area-inset-bottom,0px));
 }
@@ -49,7 +54,7 @@ img{max-width:100%}
 
 /* hero */
 .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:start;padding-block:24px 48px}
-.tag{display:inline-block;background:var(--gift);color:var(--ink);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:6px;transform:rotate(-1.5deg)}
+.tag{display:inline-block;background:var(--gift);color:var(--onprimary);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:6px;transform:rotate(-1.5deg)}
 h1{font-weight:900;font-size:clamp(34px,5.4vw,58px);line-height:1.05;letter-spacing:-.03em;margin:18px 0 16px;text-wrap:balance}
 h1 mark{background:none;color:var(--zalo);position:relative;white-space:nowrap}
 h1 mark::after{content:"";position:absolute;left:0;right:0;bottom:.02em;height:.18em;background:var(--gift);z-index:-1;border-radius:3px}
@@ -63,20 +68,20 @@ h1 mark::after{content:"";position:absolute;left:0;right:0;bottom:.02em;height:.
 .gift span{color:var(--ink-soft);font-size:14px}
 
 /* form card */
-.card{background:var(--paper);border-radius:20px;padding:28px;border:2px solid var(--ink);box-shadow:8px 8px 0 var(--ink);position:sticky;top:20px}
+.card{background:var(--paper);border-radius:20px;padding:28px;border:1px solid var(--line);box-shadow:0 0 0 1px rgba(0,245,212,.22),0 18px 50px rgba(0,0,0,.4),0 0 40px rgba(0,245,212,.12);position:sticky;top:20px}
 .card h2{margin:0 0 6px;font-size:24px;font-weight:900;letter-spacing:-.02em}
 .card p.sub{margin:0 0 20px;color:var(--ink-soft);font-size:15px}
 .field{display:grid;gap:6px;margin-bottom:14px}
 .field label{font-weight:600;font-size:14px}
-.field input{font:inherit;font-size:16px;padding:13px 14px;border-radius:10px;border:1.5px solid var(--line);background:#F8FAFD;color:var(--ink);width:100%}
-.field input:focus{outline:none;border-color:var(--zalo);box-shadow:0 0 0 3px rgba(0,104,255,.18);background:#fff}
+.field input{font:inherit;font-size:16px;padding:13px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--field);color:var(--ink);width:100%}
+.field input:focus{outline:none;border-color:var(--zalo);box-shadow:0 0 0 3px rgba(0,245,212,.25);background:#0f2a52}
 .field input[aria-invalid="true"]{border-color:var(--err)}
 .field .msg{font-size:13px;color:var(--err);min-height:0}
 .consent{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;margin-bottom:14px;font-size:13.5px;color:var(--ink-soft);line-height:1.5}
 .consent input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--zalo)}
 .consent .msg{grid-column:2;font-size:13px;color:var(--err)}
-.btn{appearance:none;border:0;cursor:pointer;font:inherit;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px 18px;border-radius:12px;background:var(--zalo);color:#fff;text-decoration:none;transition:transform .15s ease,background .15s ease}
-.btn:hover{background:var(--zalo-deep)}
+.btn{appearance:none;border:0;cursor:pointer;font:inherit;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px 18px;border-radius:12px;background:linear-gradient(135deg,#00F5D4,#7CF0FF);color:var(--onprimary);text-decoration:none;box-shadow:0 0 22px rgba(0,245,212,.28);transition:transform .15s ease,background .15s ease}
+.btn:hover{filter:brightness(1.08)}
 .btn:active{transform:translateY(1px)}
 .btn:focus-visible,.yt-mini:focus-visible,.link-btn:focus-visible{outline:3px solid var(--gift);outline-offset:2px}
 .btn[disabled]{opacity:.7;cursor:progress}
@@ -114,8 +119,8 @@ h1 mark::after{content:"";position:absolute;left:0;right:0;bottom:.02em;height:.
 .r-item .no{font-size:13px;font-weight:800;color:var(--zalo);letter-spacing:.06em;text-transform:uppercase}
 .r-item h3{margin:0;font-size:19px;font-weight:800}
 .r-item p{margin:0;color:var(--ink-soft);font-size:14.5px;flex:1}
-.link-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 14px;border-radius:10px;font-weight:700;text-decoration:none;background:var(--ink);color:#fff}
-.link-btn:hover{background:#1d3257}
+.link-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 14px;border-radius:10px;font-weight:700;text-decoration:none;background:var(--zalo);color:var(--onprimary)}
+.link-btn:hover{background:var(--zalo-deep)}
 .guide{margin-top:20px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:grid;gap:14px}
 .guide .no{font-size:13px;font-weight:800;color:var(--yt);letter-spacing:.06em;text-transform:uppercase}
 .guide h3{margin:0;font-size:20px;font-weight:800}
@@ -124,15 +129,15 @@ h1 mark::after{content:"";position:absolute;left:0;right:0;bottom:.02em;height:.
 .guide .btn-yt{justify-self:start}
 
 /* zalo block */
-.zalo{margin-block:40px;background:var(--zalo);color:#fff;border-radius:24px;padding:36px;display:grid;grid-template-columns:1.2fr .8fr;gap:32px;align-items:center;position:relative;overflow:hidden}
+.zalo{margin-block:40px;background:linear-gradient(135deg,#1a2f78,#4b2f9e);border:1px solid rgba(155,108,255,.45);color:#fff;border-radius:24px;padding:36px;display:grid;grid-template-columns:1.2fr .8fr;gap:32px;align-items:center;position:relative;overflow:hidden}
 .zalo::before{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.08)}
 .zalo h2{margin:0 0 12px;font-size:clamp(26px,3.6vw,36px);font-weight:900;line-height:1.15;letter-spacing:-.02em;text-wrap:balance}
 .zalo ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
 .zalo li{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start}
 .zalo li svg{width:22px;height:22px;margin-top:2px}
 .zalo .cta{display:grid;gap:12px;position:relative}
-.btn-gift{background:var(--gift);color:var(--ink)}
-.btn-gift:hover{background:#ffdc66}
+.btn-gift{background:linear-gradient(135deg,#00F5D4,#7CF0FF);color:var(--onprimary)}
+.btn-gift:hover{filter:brightness(1.08)}
 .zalo .note{font-size:13px;opacity:.85;text-align:center;margin:0}
 
 /* youtube */
@@ -156,14 +161,14 @@ details p{margin:10px 0 0;color:var(--ink-soft)}
 footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center}
 
 /* sticky zalo bar */
-.bar{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line);z-index:10}
+.bar{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:rgba(10,25,47,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line);z-index:10}
 .bar .inner{max-width:1080px;margin:0 auto;display:flex;gap:12px;align-items:center}
 .bar .txt{flex:1;font-size:14px;font-weight:600;line-height:1.3}
 .bar .btn{width:auto;padding:12px 18px;font-size:15px;white-space:nowrap}
 
 @media (max-width:860px){
   .hero{grid-template-columns:1fr;gap:28px}
-  .card{position:static;box-shadow:6px 6px 0 var(--ink)}
+  .card{position:static}
   .r-grid{grid-template-columns:1fr}
   .zalo{grid-template-columns:1fr;padding:28px 22px}
   .yt{grid-template-columns:auto 1fr}
@@ -263,9 +268,9 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     <div>
       <h2 id="zaloTitle">Hết lượt tạo video giữa chừng? Vào nhóm Zalo.</h2>
       <ul>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="#FFD23F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Tư vấn <b>tài khoản AI giá tốt</b> để tạo video thoải mái, không lo hết lượt.</span></li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="#FFD23F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Kẹt ở bước nào cứ hỏi trong nhóm, có người chỉ.</span></li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="#FFD23F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Cập nhật prompt và tool mới trước khi đăng lên kênh.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="#00F5D4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Tư vấn <b>tài khoản AI giá tốt</b> để tạo video thoải mái, không lo hết lượt.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="#00F5D4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Kẹt ở bước nào cứ hỏi trong nhóm, có người chỉ.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="#00F5D4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Cập nhật prompt và tool mới trước khi đăng lên kênh.</span></li>
       </ul>
     </div>
     <div class="cta">
