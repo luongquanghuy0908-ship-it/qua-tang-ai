@@ -82,6 +82,28 @@ h1 mark::after{content:"";position:absolute;left:0;right:0;bottom:.02em;height:.
 .btn[disabled]{opacity:.7;cursor:progress}
 .fine{font-size:12.5px;color:var(--ink-soft);margin:12px 0 0;text-align:center}
 
+
+/* thư viện */
+.crumbs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px;margin:0 0 16px;color:var(--ink-soft)}
+.crumbs a{color:var(--zalo);font-weight:600;text-decoration:none;cursor:pointer}
+.crumbs a:hover{text-decoration:underline}
+.crumbs span.sep{opacity:.5}
+.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.tile{appearance:none;text-align:left;font:inherit;cursor:pointer;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:8px;color:var(--ink);min-width:0;transition:border-color .15s ease,transform .15s ease}
+.tile:hover{border-color:var(--zalo);transform:translateY(-2px)}
+.tile:focus-visible{outline:3px solid var(--gift);outline-offset:2px}
+.tile .kind{align-self:flex-start;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--zalo);background:var(--ground);padding:3px 8px;border-radius:6px}
+.tile h3{margin:0;font-size:19px;font-weight:800;overflow-wrap:anywhere}
+.tile p{margin:0;color:var(--ink-soft);font-size:14.5px;overflow-wrap:anywhere}
+.tile .cnt{margin-top:auto;font-size:13px;color:var(--ink-soft)}
+.lib-empty{background:var(--paper);border:1px dashed var(--line);border-radius:var(--radius);padding:24px;color:var(--ink-soft)}
+.lib-view{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:grid;gap:14px}
+.lib-view h3{margin:0;font-size:22px;font-weight:800}
+.lib-view .frame{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
+.lib-view iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.lib-view .body p{margin:0 0 12px;overflow-wrap:anywhere}
+.lib-view .link-btn{justify-self:start}
+
 /* reward */
 .reward{padding-block:8px 48px}
 .unlocked{display:flex;align-items:center;gap:10px;color:var(--ok);font-weight:800;font-size:14px;letter-spacing:.06em;text-transform:uppercase}
@@ -237,35 +259,10 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
       Đã mở khoá
     </div>
-    <h2 id="rewardTitle">Quà của bạn đây — bấm vào là dùng</h2>
+    <h2 id="rewardTitle">Kho quà của bạn đây</h2>
 
-    <div class="r-grid">
-      <article class="r-item">
-        <span class="no">Quà 1</span>
-        <h3>Tool làm video AI miễn phí</h3>
-        <p>Mở bằng tài khoản Google của bạn. Gõ mô tả cảnh muốn làm, tool tự dựng video.</p>
-        <a class="link-btn" data-go="v" href="#" target="_blank" rel="noopener">Mở tool tạo video →</a>
-      </article>
-      <article class="r-item">
-        <span class="no">Quà 2</span>
-        <h3>Tool tạo ảnh AI</h3>
-        <p>Tạo ảnh bìa, ảnh minh hoạ, ảnh nhân vật để ghép vào video.</p>
-        <a class="link-btn" data-go="i" href="#" target="_blank" rel="noopener">Mở tool tạo ảnh →</a>
-      </article>
-      <article class="r-item">
-        <span class="no">Quà 3</span>
-        <h3>Bộ prompt tạo video</h3>
-        <p>Câu lệnh mẫu soạn sẵn. Copy, đổi vài chữ theo ý bạn rồi dán vào tool video.</p>
-        <a class="link-btn" data-go="p" href="#" target="_blank" rel="noopener">Xem bộ prompt →</a>
-      </article>
-    </div>
-
-    <div class="guide">
-      <span class="no">Video hướng dẫn</span>
-      <h3>Video hướng dẫn sử dụng tool</h3>
-      <div class="frame"><iframe id="guideVideo" data-src="https://www.youtube-nocookie.com/embed/N30OLG-8oKI" title="Video hướng dẫn sử dụng tool" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
-      <a class="btn btn-yt" href="https://www.youtube.com/watch?v=N30OLG-8oKI" target="_blank" rel="noopener">Xem video hướng dẫn trên YouTube →</a>
-    </div>
+    <nav class="crumbs" id="crumbs" aria-label="Đường dẫn"></nav>
+    <div id="lib" aria-live="polite"></div>
   </section>
 
   <div id="after" hidden>
@@ -342,6 +339,137 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     p:"https://1drv.ms/w/c/f069d7cd408eefa7/IQCe7RW2rjUpSIFbhgw0eNcAASIWOZQgfn6iVgOkGiarTPo?e=qIbGNG"
   };
 
+  var Lib = (function(){
+    var SHEET_CSV = "https://docs.google.com/spreadsheets/d/18A93bCc-eJ1MlIqcMxFaVEYo-sGkiCyTx66q6-aifXU/gviz/tq?tqx=out:csv&gid=853807428";
+    var FALLBACK = [
+      ["Mã","Thuộc ô","Loại","Tên","Mô tả","Link hoặc nội dung","Thứ tự","Hiện"],
+      ["qua","","ô","Quà tặng miễn phí","Tool và file dùng ngay, không mất phí","",1,"Có"],
+      ["video","","ô","Video hướng dẫn","Xem từng bước cách dùng tool và làm video AI","",2,"Có"],
+      ["khoa-hoc","","ô","Khóa học","Các khóa học miễn phí","",3,"Có"],
+      ["tin-tuc","","ô","Tin tức và kiến thức AI","Bài viết ngắn, mẹo dùng AI mỗi tuần","",4,"Có"],
+      ["cua-hang","","ô","Cửa hàng","Tài khoản AI và dịch vụ của Trạm AI Việt","",5,"Có"],
+      ["qua-tool-video","qua","link","Tool làm video AI","Gõ ý tưởng, tool dựng ra video. Chạy trên Google Flow",LINKS.v,1,"Có"],
+      ["qua-tool-anh","qua","link","Tool tạo ảnh AI","Làm ảnh bìa, ảnh minh họa, ảnh nhân vật",LINKS.i,2,"Có"],
+      ["qua-prompt","qua","link","Bộ prompt tạo video","Câu lệnh soạn sẵn, copy dán vào là ra video",LINKS.p,3,"Có"],
+      ["video-tool","video","video","Hướng dẫn sử dụng tool","Xem cách dùng tool video và tool ảnh","https://www.youtube.com/watch?v=N30OLG-8oKI",1,"Có"],
+      ["ch-web","cua-hang","link","Web shop Trạm AI Việt","Xem bảng giá và mua tài khoản AI","https://luongquanghuy0908-ship-it.github.io/tram-ai-viet/",1,"Có"],
+      ["ch-zalo","cua-hang","link","Nhóm Zalo Trạm AI Việt","Hỏi đáp, nhận tư vấn và báo giá","https://zalo.me/g/enu2k2n5h6fmli8womh6",2,"Có"]
+    ];
+    var nodes = {}, roots = [], started = false;
+    var libEl = document.getElementById("lib"), crumbEl = document.getElementById("crumbs");
+
+    function norm(t){ return String(t == null ? "" : t).normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").toLowerCase().trim(); }
+    function parseCSV(t){
+      var rows = [], row = [], f = "", q = false, i, c;
+      for (i = 0; i < t.length; i++) {
+        c = t.charAt(i);
+        if (q) { if (c === '"') { if (t.charAt(i+1) === '"') { f += '"'; i++; } else q = false; } else f += c; }
+        else if (c === '"') q = true;
+        else if (c === ",") { row.push(f); f = ""; }
+        else if (c === "\n") { row.push(f); rows.push(row); row = []; f = ""; }
+        else if (c !== "\r") f += c;
+      }
+      if (f !== "" || row.length) { row.push(f); rows.push(row); }
+      return rows;
+    }
+    function safeUrl(u){ u = String(u || "").trim(); return /^https?:\/\//i.test(u) ? u : ""; }
+    function build(rows){
+      nodes = {}; roots = [];
+      rows.slice(1).forEach(function(r){
+        var id = String(r[0] || "").trim();
+        if (!id || norm(r[7]) === "khong") return;
+        nodes[id] = { id:id, parent:String(r[1] || "").trim(), type:norm(r[2]), title:String(r[3] || ""), desc:String(r[4] || ""), val:String(r[5] || ""), ord:parseFloat(r[6]) || 999, kids:[] };
+      });
+      Object.keys(nodes).forEach(function(id){
+        var n = nodes[id];
+        if (!n.parent) roots.push(n);
+        else if (nodes[n.parent]) nodes[n.parent].kids.push(n);
+      });
+      function byOrd(a, b){ return a.ord - b.ord; }
+      roots.sort(byOrd);
+      Object.keys(nodes).forEach(function(id){ nodes[id].kids.sort(byOrd); });
+    }
+    function isContainer(n){ return n.kids.length > 0 || n.type === "o" || (n.type === "khoa hoc" && !safeUrl(n.val)); }
+    function kindLabel(n){
+      if (isContainer(n)) return n.type === "khoa hoc" ? "Khóa học" : "Mục";
+      return { video:"Video", "bai viet":"Bài viết", "tin tuc":"Tin tức", link:"Link", "khoa hoc":"Khóa học" }[n.type] || "Link";
+    }
+    function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+    function tile(n){
+      var b = el("button", "tile"); b.type = "button";
+      b.appendChild(el("span", "kind", kindLabel(n)));
+      b.appendChild(el("h3", null, n.title));
+      if (n.desc) b.appendChild(el("p", null, n.desc));
+      if (n.kids.length) b.appendChild(el("span", "cnt", n.kids.length + " mục bên trong"));
+      b.addEventListener("click", function(){
+        var inside = isContainer(n) || n.type === "video" || n.type === "bai viet" || n.type === "tin tuc";
+        if (inside) { location.hash = "#/" + n.id; return; }
+        var u = safeUrl(n.val); if (u) window.open(u, "_blank", "noopener");
+      });
+      return b;
+    }
+    function ytId(u){ var m = String(u).match(/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/)([\w-]{11})/); return m ? m[1] : ""; }
+
+    function crumbs(n){
+      crumbEl.textContent = "";
+      var home = el("a", null, "Kho quà"); home.href = "#/"; crumbEl.appendChild(home);
+      var chain = [], cur = n;
+      while (cur) { chain.unshift(cur); cur = cur.parent ? nodes[cur.parent] : null; }
+      chain.forEach(function(c, i){
+        crumbEl.appendChild(el("span", "sep", "›"));
+        if (i === chain.length - 1) crumbEl.appendChild(el("span", null, c.title));
+        else { var a = el("a", null, c.title); a.href = "#/" + c.id; crumbEl.appendChild(a); }
+      });
+    }
+    function grid(list){ var g = el("div", "lib-grid"); list.forEach(function(k){ g.appendChild(tile(k)); }); return g; }
+    function render(){
+      if (!started) return;
+      var id = decodeURIComponent(location.hash.replace(/^#\/?/, ""));
+      var n = id ? nodes[id] : null;
+      libEl.textContent = "";
+      crumbs(n);
+      if (!n) {
+        libEl.appendChild(roots.length ? grid(roots) : el("div", "lib-empty", "Chưa có nội dung."));
+        return;
+      }
+      if (isContainer(n)) {
+        libEl.appendChild(n.kids.length ? grid(n.kids) : el("div", "lib-empty", "Mục này chưa có nội dung. Quay lại sau nhé."));
+        return;
+      }
+      var v = el("div", "lib-view");
+      v.appendChild(el("h3", null, n.title));
+      if (n.desc) v.appendChild(el("p", null, n.desc));
+      var u = safeUrl(n.val), yid = ytId(n.val);
+      if (n.type === "video" && yid) {
+        var fr = el("div", "frame"), ifr = document.createElement("iframe");
+        ifr.src = "https://www.youtube-nocookie.com/embed/" + yid; ifr.title = n.title; ifr.setAttribute("allowfullscreen", "");
+        ifr.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+        fr.appendChild(ifr); v.appendChild(fr);
+      }
+      if (u) {
+        var a = el("a", "link-btn", n.type === "video" ? "Xem trên YouTube →" : "Mở liên kết →");
+        a.href = u; a.target = "_blank"; a.rel = "noopener"; v.appendChild(a);
+      } else if (n.val) {
+        var body = el("div", "body");
+        n.val.split(/\n+/).forEach(function(line){ if (line.trim()) body.appendChild(el("p", null, line)); });
+        v.appendChild(body);
+      }
+      libEl.appendChild(v);
+    }
+    function load(){
+      build(FALLBACK); render();
+      try {
+        fetch(SHEET_CSV + "&_=" + Date.now(), { cache:"no-store" })
+          .then(function(r){ return r.ok ? r.text() : Promise.reject(); })
+          .then(function(t){ var rows = parseCSV(t); if (rows.length > 1 && norm(rows[0][0]) === "ma") { build(rows); render(); } })
+          .catch(function(){});
+      } catch (e) {}
+    }
+    window.addEventListener("hashchange", render);
+    return { start:function(){ if (started) return; started = true; if (!/^#\/./.test(location.hash)) location.hash = "#/"; load(); } };
+  })();
+
   var form = document.getElementById("leadForm");
   var btn = document.getElementById("submitBtn");
   var f = { name:document.getElementById("f-name"), phone:document.getElementById("f-phone"), mail:document.getElementById("f-mail") };
@@ -366,13 +494,11 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
   }
 
   function unlock(name){
-    document.querySelectorAll("[data-go]").forEach(function(a){ a.href = LINKS[a.getAttribute("data-go")]; });
-    if (name) document.getElementById("rewardTitle").textContent = "Quà của " + name.split(" ").pop() + " đây — bấm vào là dùng";
+    if (name) document.getElementById("rewardTitle").textContent = "Kho quà của " + name.split(" ").pop() + " đây";
     document.getElementById("gate").hidden = true;
     var r = document.getElementById("reward");
     r.hidden = false;
-    var gv = document.getElementById("guideVideo");
-    if (gv && !gv.getAttribute("src")) gv.setAttribute("src", gv.getAttribute("data-src"));
+    Lib.start();
     ["after","bar","ytTop","fbTop"].forEach(function(id){ document.getElementById(id).hidden = false; });
     r.scrollIntoView({ behavior:"smooth", block:"start" });
   }
