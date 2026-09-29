@@ -145,7 +145,8 @@ a{color:var(--cyan)}
         <div class="err" id="editErr" role="alert" style="margin-top:8px"></div>
         <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
           <button class="btn" type="submit" id="saveBtn">Lưu</button>
-          <button class="btn ghost" type="button" id="cancelBtn">Hủy</button>
+          <button class="btn ghost" type="button" id="cancelBtn">Đóng</button>
+          <span class="hint" id="autoMsg" aria-live="polite" style="align-self:center">Tự lưu: bật. Bạn ghi xong là mục tự được lưu.</span>
         </div>
       </form>
 
@@ -376,7 +377,7 @@ a{color:var(--cyan)}
     $("e-id").value = r ? r.id : ""; $("e-id").readOnly = !!r;
     $("e-show").value = r ? r.show : "Có";
     fillParents(r ? r.parent : (parentPreset || ""), r ? r.id : null);
-    $("editErr").textContent = ""; $("editor").hidden = false; $("e-title").focus();
+    $("editErr").textContent = ""; $("autoMsg").textContent = "Tự lưu: bật. Bạn ghi xong là mục tự được lưu."; autoDirty = false; clearTimeout(autoTimer); $("editor").hidden = false; $("e-title").focus();
     $("editor").scrollIntoView({ behavior:"smooth", block:"start" });
   }
   $("collapseAll").addEventListener("click", function(){ rows.forEach(function(r){ if (kidsOf(r.id).length) collapsed[r.id] = true; }); saveCollapsed(); renderTree(); });
@@ -384,7 +385,7 @@ a{color:var(--cyan)}
   $("addBtn").addEventListener("click", function(){ openEditor(null, ""); });
   $("cancelBtn").addEventListener("click", function(){ $("editor").hidden = true; });
   $("editor").addEventListener("submit", function(e){
-    e.preventDefault();
+    e.preventDefault(); clearTimeout(autoTimer); autoDirty = false;
     var title = $("e-title").value.trim();
     var id = $("e-id").value.trim() || slug(title);
     if (!editingId) { var base = id || "muc", n = 2; while (rows.some(function(r){ return r.id === id; })) id = base + "-" + (n++); }
@@ -397,6 +398,38 @@ a{color:var(--cyan)}
     }).catch(function(err){ $("editErr").textContent = err.message; })
       .then(function(){ $("saveBtn").disabled = false; });
   });
+
+  /* tự lưu */
+  var autoTimer = null, autoBusy = false, autoDirty = false;
+  function hhmmss(){ var d = new Date(); return [d.getHours(), d.getMinutes(), d.getSeconds()].map(function(x){ return (x < 10 ? "0" : "") + x; }).join(":"); }
+  function scheduleAuto(){
+    autoDirty = true;
+    $("autoMsg").textContent = "Đang chờ bạn ghi xong…";
+    clearTimeout(autoTimer); autoTimer = setTimeout(runAuto, 1500);
+  }
+  function runAuto(){
+    if ($("editor").hidden) return;
+    if (autoBusy) { autoTimer = setTimeout(runAuto, 800); return; }
+    var title = $("e-title").value.trim();
+    if (!title) { $("autoMsg").textContent = "Nhập tên để được tự lưu."; return; }
+    var id = $("e-id").value.trim() || slug(title);
+    if (!editingId) { var base = id || "muc", n = 2; while (rows.some(function(r){ return r.id === id; })) id = base + "-" + (n++); }
+    var row = { id:id, parent:$("e-parent").value, type:$("e-type").value, title:title, desc:$("e-desc").value.trim(),
+      val:$("e-val").value, ord:Number($("e-ord").value), show:$("e-show").value };
+    autoBusy = true; autoDirty = false;
+    call("save", { row:row }).then(function(j){
+      if (!j.ok) { $("autoMsg").textContent = "Chưa tự lưu được: " + (j.error || "lỗi"); return; }
+      if (!editingId) { editingId = id; $("e-id").value = id; $("e-id").readOnly = true; $("editorTitle").textContent = "Sửa: " + title; }
+      var i = rows.findIndex(function(r){ return r.id === id; });
+      if (i >= 0) rows[i] = row; else rows.push(row);
+      renderTree();
+      $("autoMsg").textContent = "Đã tự lưu lúc " + hhmmss();
+    }).catch(function(err){ $("autoMsg").textContent = "Chưa tự lưu được: " + err.message; })
+      .then(function(){ autoBusy = false; if (autoDirty) scheduleAuto(); });
+  }
+  ["e-title","e-desc","e-val","e-ord"].forEach(function(id){ $(id).addEventListener("input", scheduleAuto); });
+  ["e-type","e-parent","e-show"].forEach(function(id){ $(id).addEventListener("change", scheduleAuto); });
+  window.addEventListener("beforeunload", function(ev){ if (autoDirty && !$("editor").hidden) { ev.preventDefault(); ev.returnValue = ""; } });
 
   /* tab */
   function selectTab(which){
