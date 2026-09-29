@@ -74,11 +74,13 @@ h1 mark::after{content:"";position:absolute;left:0;right:0;bottom:.02em;height:.
 .field{display:grid;gap:6px;margin-bottom:14px}
 .field label{font-weight:600;font-size:14px}
 .field input{font:inherit;font-size:16px;padding:13px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--field);color:var(--ink);width:100%}
+.field input::placeholder{color:#8FA5C7;opacity:1}
 .field input:focus{outline:none;border-color:var(--zalo);box-shadow:0 0 0 3px rgba(0,245,212,.25);background:#0f2a52}
 .field input[aria-invalid="true"]{border-color:var(--err)}
 .field .msg{font-size:13px;color:var(--err);min-height:0}
-.consent{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;margin-bottom:14px;font-size:13.5px;color:var(--ink-soft);line-height:1.5}
-.consent input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--zalo)}
+.consent{display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:start;margin-bottom:14px;font-size:13.5px;color:var(--ink-soft);line-height:1.5}
+.consent input{width:24px;height:24px;margin:0;accent-color:var(--zalo);cursor:pointer}
+.consent label{cursor:pointer;padding-block:2px}
 .consent .msg{grid-column:2;font-size:13px;color:var(--err)}
 .btn{appearance:none;border:0;cursor:pointer;font:inherit;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px 18px;border-radius:12px;background:linear-gradient(135deg,#00F5D4,#7CF0FF);color:var(--onprimary);text-decoration:none;box-shadow:0 0 22px rgba(0,245,212,.28);transition:transform .15s ease,background .15s ease}
 .btn:hover{filter:brightness(1.08)}
@@ -463,7 +465,10 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
           .catch(function(){});
       } catch (e) {}
     }
-    window.addEventListener("hashchange", render);
+    window.addEventListener("hashchange", function(){
+      render();
+      if (started) crumbEl.scrollIntoView({ behavior: "auto", block: "start" });
+    });
     return { start:function(){ if (started) return; started = true; if (!/^#\/./.test(location.hash)) location.hash = "#/"; load(); } };
   })();
 
@@ -474,6 +479,9 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
   var okBox = document.getElementById("f-ok");
 
   function setErr(k, text){ m[k].textContent = text; (f[k] || okBox).setAttribute("aria-invalid", text ? "true" : "false"); }
+
+  ["name","phone","mail"].forEach(function(k){ f[k].addEventListener("input", function(){ setErr(k, ""); }); });
+  okBox.addEventListener("change", function(){ if (okBox.checked) setErr("ok", ""); });
 
   function validate(){
     var ok = true;
