@@ -54,6 +54,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--cyan);bo
 .item .t{font-weight:600;overflow-wrap:anywhere}
 .item .m{font:400 12px var(--mono);color:var(--muted);overflow-wrap:anywhere}
 .item .r{display:flex;gap:6px;flex-wrap:wrap}
+.pick,#selAll{width:20px;height:20px;accent-color:var(--cyan);margin:0 10px 0 0;vertical-align:middle;flex:none;padding:0}
+.bulk{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.bulk label{display:flex;align-items:center;font-weight:600;cursor:pointer;margin:0;color:var(--fg);font-size:14px}
+.bulk .grow{flex:1}
+.chev{appearance:none;background:transparent;border:1px solid var(--line);color:var(--cyan);width:28px;height:28px;border-radius:8px;cursor:pointer;margin-right:8px;font:600 14px var(--mono);flex:none;vertical-align:middle;line-height:1}
+.chev:hover{border-color:var(--cyan)}
+.cnt{font:400 12px var(--mono);color:var(--muted);margin-left:8px}
 .tag{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--cyan);margin-right:6px}
 .tag.off{color:var(--pink);border-color:var(--pink)}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -108,7 +115,11 @@ a{color:var(--cyan)}
     <section id="contentView" style="display:flex;flex-direction:column;gap:14px;margin-top:14px">
       <div class="bar">
         <p class="hint" style="margin:0">Sửa xong, trang quà tặng cập nhật sau vài phút. Chỉ đưa nội dung miễn phí vào đây, vì trang công khai.</p>
-        <button class="btn" id="addBtn" type="button">+ Thêm mới</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ghost" id="collapseAll" type="button">Thu gọn tất cả</button>
+          <button class="btn ghost" id="expandAll" type="button">Mở rộng tất cả</button>
+          <button class="btn" id="addBtn" type="button">+ Thêm mới</button>
+        </div>
       </div>
 
       <form id="editor" class="card" hidden>
@@ -138,6 +149,17 @@ a{color:var(--cyan)}
         </div>
       </form>
 
+      <div class="bulk" id="bulkBar">
+        <label><input type="checkbox" id="selAll">Chọn tất cả</label>
+        <span class="hint" id="selCount"></span>
+        <span class="grow"></span>
+        <span id="bulkBtns" style="display:none;gap:8px;flex-wrap:wrap">
+          <button class="btn ghost sm" id="bulkShow" type="button">Hiện đã chọn</button>
+          <button class="btn ghost sm" id="bulkHide" type="button">Ẩn đã chọn</button>
+          <button class="btn danger sm" id="bulkDel" type="button">Xóa đã chọn</button>
+        </span>
+        <div id="bulkConfirm" style="width:100%;display:none;gap:8px;align-items:center;flex-wrap:wrap"></div>
+      </div>
       <div id="treeMsg" class="hint">Đang tải…</div>
       <div id="tree" class="tree"></div>
     </section>
@@ -157,6 +179,10 @@ a{color:var(--cyan)}
   var pw = "";
   var rows = [];
   var editingId = null;
+  var collapsed = {};
+  var sel = {};
+  try { collapsed = JSON.parse(localStorage.getItem("collapsed") || "{}") || {}; } catch(e){ collapsed = {}; }
+  function saveCollapsed(){ try { localStorage.setItem("collapsed", JSON.stringify(collapsed)); } catch(e){} }
   var $ = function(id){ return document.getElementById(id); };
 
   function store(k, v){ try { if (v == null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch(e){} }
@@ -203,7 +229,7 @@ a{color:var(--cyan)}
     $("treeMsg").textContent = "Đang tải…";
     call("list").then(function(j){
       if (!j.ok) { $("treeMsg").textContent = j.error || "Lỗi tải."; if (/mật khẩu/i.test(j.error||"")) { store("pw", null); show("login"); } return; }
-      rows = j.rows; renderTree(); $("treeMsg").textContent = rows.length ? "" : "Chưa có nội dung. Bấm “Thêm mới”.";
+      rows = j.rows; Object.keys(sel).forEach(function(id){ if (!rows.some(function(r){ return r.id === id; })) delete sel[id]; }); renderTree(); $("treeMsg").textContent = rows.length ? "" : "Chưa có nội dung. Bấm “Thêm mới”.";
     }).catch(function(err){ $("treeMsg").textContent = err.message; });
   }
 
@@ -216,9 +242,27 @@ a{color:var(--cyan)}
         var it = document.createElement("div"); it.className = "item" + (r.show === "Không" ? " off" : ""); it.style.marginLeft = (depth * 22) + "px";
         var l = document.createElement("div"); l.className = "l";
         var t = document.createElement("div"); t.className = "t";
+        var nk = kidsOf(r.id).length;
+        var pk = document.createElement("input"); pk.type = "checkbox"; pk.className = "pick"; pk.checked = !!sel[r.id];
+        pk.setAttribute("aria-label", "Chọn " + r.title);
+        pk.addEventListener("change", function(){
+          var on = pk.checked; sel[r.id] = on || undefined; if (!on) delete sel[r.id];
+          descendants(r.id).forEach(function(d){ if (on) sel[d] = true; else delete sel[d]; });
+          renderTree();
+        });
+        t.appendChild(pk);
+        if (nk) {
+          var ch = document.createElement("button"); ch.type = "button"; ch.className = "chev";
+          ch.textContent = collapsed[r.id] ? "▸" : "▾";
+          ch.setAttribute("aria-expanded", collapsed[r.id] ? "false" : "true");
+          ch.setAttribute("aria-label", (collapsed[r.id] ? "Mở rộng " : "Thu gọn ") + r.title);
+          ch.addEventListener("click", function(){ if (collapsed[r.id]) delete collapsed[r.id]; else collapsed[r.id] = true; saveCollapsed(); renderTree(); });
+          t.appendChild(ch);
+        }
         var tag = document.createElement("span"); tag.className = "tag"; tag.textContent = r.type; t.appendChild(tag);
         if (r.show === "Không") { var off = document.createElement("span"); off.className = "tag off"; off.textContent = "ẩn"; t.appendChild(off); }
         t.appendChild(document.createTextNode(r.title));
+        if (nk) { var cn = document.createElement("span"); cn.className = "cnt"; cn.textContent = nk + " mục bên trong"; t.appendChild(cn); }
         var m = document.createElement("div"); m.className = "m"; m.textContent = r.id + (r.val && /^https?:/i.test(r.val) ? "  ·  " + r.val : "");
         l.appendChild(t); l.appendChild(m);
         var rt = document.createElement("div"); rt.className = "r";
@@ -228,11 +272,60 @@ a{color:var(--cyan)}
         b(r.show === "Không" ? "Hiện" : "Ẩn", "ghost", function(){ quickSave(r, { show: r.show === "Không" ? "Có" : "Không" }); });
         b("Xóa", "danger", function(){ askDelete(r, it); });
         it.appendChild(l); it.appendChild(rt); box.appendChild(it);
-        walk(r.id, depth + 1);
+        if (!collapsed[r.id]) walk(r.id, depth + 1);
       });
     }
     walk("", 0);
+    updateBulk();
   }
+  function descendants(id){ var out = []; kidsOf(id).forEach(function(k){ out.push(k.id); out = out.concat(descendants(k.id)); }); return out; }
+  function depthOf(id){ var d = 0, cur = rows.filter(function(r){ return r.id === id; })[0]; while (cur && cur.parent && d < 50) { d++; cur = rows.filter(function(r){ return r.id === cur.parent; })[0]; } return d; }
+  function selIds(){ return Object.keys(sel).filter(function(id){ return rows.some(function(r){ return r.id === id; }); }); }
+  function updateBulk(){
+    var n = selIds().length, total = rows.length, all = $("selAll");
+    all.checked = total > 0 && n === total; all.indeterminate = n > 0 && n < total;
+    $("selCount").textContent = n ? ("Đã chọn " + n + " mục") : "";
+    $("bulkBtns").style.display = n ? "flex" : "none";
+    if (!n) $("bulkConfirm").style.display = "none";
+  }
+  $("selAll").addEventListener("change", function(){
+    sel = {}; if ($("selAll").checked) rows.forEach(function(r){ sel[r.id] = true; });
+    renderTree();
+  });
+  function bulkShowHide(val){
+    var ids = selIds(); if (!ids.length) return;
+    var i = 0, fail = 0;
+    (function next(){
+      if (i >= ids.length) { sel = {}; refresh(); if (fail) alert_(fail + " mục không đổi được."); return; }
+      var r = rows.filter(function(x){ return x.id === ids[i++]; })[0];
+      $("treeMsg").textContent = "Đang cập nhật " + i + "/" + ids.length + "…";
+      call("save", { row:Object.assign({}, r, { show:val }) }).then(function(j){ if (!j.ok) fail++; next(); }).catch(function(){ fail++; next(); });
+    })();
+  }
+  $("bulkShow").addEventListener("click", function(){ bulkShowHide("Có"); });
+  $("bulkHide").addEventListener("click", function(){ bulkShowHide("Không"); });
+  $("bulkDel").addEventListener("click", function(){
+    var ids = selIds(); if (!ids.length) return;
+    var box = $("bulkConfirm"); box.textContent = ""; box.style.display = "flex";
+    var t = document.createElement("span"); t.className = "err"; t.textContent = "Xóa " + ids.length + " mục đã chọn? Không hoàn tác được từ trang này.";
+    var y = document.createElement("button"); y.type = "button"; y.className = "btn sm danger"; y.textContent = "Xóa luôn";
+    var n = document.createElement("button"); n.type = "button"; n.className = "btn sm ghost"; n.textContent = "Không";
+    n.addEventListener("click", function(){ box.style.display = "none"; });
+    y.addEventListener("click", function(){
+      y.disabled = true; n.disabled = true;
+      var order = ids.slice().sort(function(a, b){ return depthOf(b) - depthOf(a); });
+      var i = 0, done = 0, fail = 0;
+      (function next(){
+        if (i >= order.length) { box.style.display = "none"; sel = {}; refresh(); if (fail) alert_("Đã xóa " + done + " mục, " + fail + " mục chưa xóa được."); return; }
+        var id = order[i++];
+        $("treeMsg").textContent = "Đang xóa " + i + "/" + order.length + "…";
+        call("delete", { id:id }).then(function(j){
+          if (j.ok || (j._tries > 1 && /Không thấy mã/.test(j.error || ""))) done++; else fail++; next();
+        }).catch(function(){ fail++; next(); });
+      })();
+    });
+    box.appendChild(t); box.appendChild(y); box.appendChild(n);
+  });
   function quickSave(r, patch){
     var row = Object.assign({}, r, patch);
     call("save", { row:row }).then(function(j){ if (!j.ok) alert_(j.error); else refresh(); }).catch(function(e){ alert_(e.message); });
@@ -286,6 +379,8 @@ a{color:var(--cyan)}
     $("editErr").textContent = ""; $("editor").hidden = false; $("e-title").focus();
     $("editor").scrollIntoView({ behavior:"smooth", block:"start" });
   }
+  $("collapseAll").addEventListener("click", function(){ rows.forEach(function(r){ if (kidsOf(r.id).length) collapsed[r.id] = true; }); saveCollapsed(); renderTree(); });
+  $("expandAll").addEventListener("click", function(){ collapsed = {}; saveCollapsed(); renderTree(); });
   $("addBtn").addEventListener("click", function(){ openEditor(null, ""); });
   $("cancelBtn").addEventListener("click", function(){ $("editor").hidden = true; });
   $("editor").addEventListener("submit", function(e){
