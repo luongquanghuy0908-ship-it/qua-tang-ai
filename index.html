@@ -72,6 +72,9 @@ h1 mark::after{content:"";position:absolute;left:0;right:0;bottom:.02em;height:.
 .field input:focus{outline:none;border-color:var(--zalo);box-shadow:0 0 0 3px rgba(0,104,255,.18);background:#fff}
 .field input[aria-invalid="true"]{border-color:var(--err)}
 .field .msg{font-size:13px;color:var(--err);min-height:0}
+.consent{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;margin-bottom:14px;font-size:13.5px;color:var(--ink-soft);line-height:1.5}
+.consent input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--zalo)}
+.consent .msg{grid-column:2;font-size:13px;color:var(--err)}
 .btn{appearance:none;border:0;cursor:pointer;font:inherit;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px 18px;border-radius:12px;background:var(--zalo);color:#fff;text-decoration:none;transition:transform .15s ease,background .15s ease}
 .btn:hover{background:var(--zalo-deep)}
 .btn:active{transform:translateY(1px)}
@@ -215,11 +218,17 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
         <div class="msg" id="m-mail"></div>
       </div>
 
+      <div class="consent">
+        <input id="f-ok" name="ok" type="checkbox">
+        <label for="f-ok">Mình đồng ý để Trạm AI Việt liên hệ qua Zalo và email về quà tặng, hướng dẫn và ưu đãi. Mình có thể xin dừng bất cứ lúc nào.</label>
+        <div class="msg" id="m-ok"></div>
+      </div>
+
       <button class="btn" type="submit" id="submitBtn">
         Nhận quà miễn phí
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
       </button>
-      <p class="fine">Thông tin chỉ dùng để gửi quà và hỗ trợ bạn, không chia sẻ cho bên khác.</p>
+      <p class="fine">Thông tin chỉ dùng để gửi quà, hỗ trợ và liên hệ bạn, không chia sẻ cho bên khác.</p>
     </form>
   </section>
 
@@ -325,7 +334,8 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
 <script>
 (function(){
   var FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSci6xa9kHs1Ct7NG5NdOmucHHqXWM1EK0GOU7-_5Cjs3bbMtg/formResponse";
-  var ENTRY = { name:"entry.1946046289", phone:"entry.2038919416", mail:"entry.961176542" };
+  var ENTRY = { name:"entry.1946046289", phone:"entry.2038919416", mail:"entry.961176542", src:"entry.1350255918", ok:"entry.568316247" };
+  var SRC = (function(){ try { var v = new URLSearchParams(location.search).get("src") || ""; v = v.toLowerCase().replace(/[^a-z0-9_-]/g,"").slice(0,40); return v || "truc-tiep"; } catch(e){ return "truc-tiep"; } })();
   var LINKS = {
     v:"https://flow.google.com/shared/tool/a91b7c88-a507-45f1-813b-dbc9f68b0b6d",
     i:"https://flow.google.com/shared/tool/958e5cc5-1e6c-4560-b3bd-c4e98499748b",
@@ -335,9 +345,10 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
   var form = document.getElementById("leadForm");
   var btn = document.getElementById("submitBtn");
   var f = { name:document.getElementById("f-name"), phone:document.getElementById("f-phone"), mail:document.getElementById("f-mail") };
-  var m = { name:document.getElementById("m-name"), phone:document.getElementById("m-phone"), mail:document.getElementById("m-mail") };
+  var m = { name:document.getElementById("m-name"), phone:document.getElementById("m-phone"), mail:document.getElementById("m-mail"), ok:document.getElementById("m-ok") };
+  var okBox = document.getElementById("f-ok");
 
-  function setErr(k, text){ m[k].textContent = text; f[k].setAttribute("aria-invalid", text ? "true" : "false"); }
+  function setErr(k, text){ m[k].textContent = text; (f[k] || okBox).setAttribute("aria-invalid", text ? "true" : "false"); }
 
   function validate(){
     var ok = true;
@@ -348,6 +359,8 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     if (name.length < 2) { setErr("name","Nhập họ tên của bạn."); ok = false; } else setErr("name","");
     if (!/^(0|\+?84)\d{9,10}$/.test(phone)) { setErr("phone","Số điện thoại chưa đúng, ví dụ 0912345678."); ok = false; } else setErr("phone","");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { setErr("mail","Gmail chưa đúng, ví dụ ban@gmail.com."); ok = false; } else setErr("mail","");
+
+    if (!okBox.checked) { setErr("ok","Bạn cần đồng ý để mình gửi quà và liên hệ."); ok = false; } else setErr("ok","");
 
     return ok ? { name:name, phone:phone, mail:mail } : null;
   }
@@ -376,7 +389,10 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
         document.body.appendChild(frame);
         var fm = document.createElement("form");
         fm.method = "POST"; fm.action = FORM_URL; fm.target = name; fm.hidden = true;
-        [[ENTRY.name, data.name], [ENTRY.phone, "'" + data.phone], [ENTRY.mail, data.mail]].forEach(function(p){
+        var rows = [[ENTRY.name, data.name], [ENTRY.phone, "'" + data.phone], [ENTRY.mail, data.mail]];
+        if (ENTRY.src) rows.push([ENTRY.src, SRC]);
+        if (ENTRY.ok) rows.push([ENTRY.ok, "Có"]);
+        rows.forEach(function(p){
           var i = document.createElement("input"); i.type = "hidden"; i.name = p[0]; i.value = p[1]; fm.appendChild(i);
         });
         document.body.appendChild(fm);
