@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Quản trị Trạm AI Việt</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#0A192F; --bg2:#12305a; --card:#112a4d; --card2:#183a66; --fg:#E2E8F0; --muted:#9fb3cf; --line:#2a4a7a;
+  --cyan:#00F5D4; --violet:#9b6cff; --pink:#FF007F; --brand:#ff5f0a; --good:#17D9A5; --warn:#ffd15c; --bad:#ff5c8a; --onaccent:#0A192F;
+  --font:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',sans-serif; --mono:'JetBrains Mono',ui-monospace,Consolas,monospace; color-scheme:dark;
+}
+@media (prefers-color-scheme:light){:root{
+  --bg:#E2E8F0; --bg2:#d3ddf3; --card:#ffffff; --card2:#f1f5fb; --fg:#0A192F; --muted:#4b5f80; --line:#c4d0e4;
+  --cyan:#0b8f7a; --violet:#6a3fd6; --pink:#d4005f; --brand:#e5530a; --good:#0d8a55; --warn:#8a6200; --bad:#b3263a; --onaccent:#ffffff; color-scheme:light}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:radial-gradient(1200px 500px at 80% -10%,var(--bg2),transparent 70%),var(--bg);color:var(--fg);font:400 15px/1.55 var(--font);padding-inline:16px;padding-block:20px 64px;min-height:100vh}
+.wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+[hidden]{display:none!important}
+.top{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.brand svg{width:44px;height:44px;border-radius:50%;box-shadow:0 0 0 2px var(--line),0 0 18px rgba(0,245,212,.25)}
+.brand b{display:block;font-size:17px;line-height:1.2}
+.brand span{font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--cyan)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.login{max-width:420px;margin:12vh auto 0;display:flex;flex-direction:column;gap:14px}
+h1{font-size:22px;margin:0}
+h2{font-size:17px;margin:0}
+label{font-size:13px;font-weight:600;color:var(--muted);display:block;margin-bottom:5px}
+input,select,textarea{width:100%;font:inherit;font-size:15px;color:var(--fg);background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+textarea{min-height:120px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,245,212,.22)}
+.btn{appearance:none;border:0;cursor:pointer;font:600 14px var(--font);padding:11px 16px;border-radius:10px;background:linear-gradient(135deg,var(--cyan),var(--violet));color:var(--onaccent);white-space:nowrap}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.6;cursor:progress}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn.danger{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+.btn.sm{padding:6px 10px;font-size:13px;border-radius:8px}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.err{color:var(--bad);font-size:14px;min-height:1.2em}
+.ok{color:var(--good);font-size:14px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{appearance:none;background:transparent;border:1px solid var(--line);color:var(--muted);font:600 14px var(--font);padding:9px 16px;border-radius:999px;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--onaccent);background:linear-gradient(135deg,var(--cyan),var(--violet));border-color:transparent}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.tree{display:flex;flex-direction:column;gap:8px}
+.item{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.item.off{opacity:.6}
+.item .l{min-width:0;flex:1 1 240px}
+.item .t{font-weight:600;overflow-wrap:anywhere}
+.item .m{font:400 12px var(--mono);color:var(--muted);overflow-wrap:anywhere}
+.item .r{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--cyan);margin-right:6px}
+.tag.off{color:var(--pink);border-color:var(--pink)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:640px){.grid{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat b{display:block;font:600 28px var(--mono);color:var(--cyan)}
+.stat span{font-size:13px;color:var(--muted)}
+.row{display:grid;grid-template-columns:minmax(90px,200px) 1fr 44px;gap:10px;align-items:center;font-size:14px;margin:6px 0}
+.row .n{overflow-wrap:anywhere}
+.track{height:12px;border-radius:99px;background:var(--card2);overflow:hidden}
+.fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--violet));border-radius:99px}
+.row .v{font-family:var(--mono);text-align:right}
+.hint{color:var(--muted);font-size:13px}
+a{color:var(--cyan)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section id="loginView" class="card login" hidden>
+    <div class="brand">
+      <svg viewBox="79 92 1096 1096" role="img" aria-label="Logo Trạm AI Việt"><circle cx="627" cy="640" r="548" fill="#000"/><g transform="translate(0 150)" fill="#ff5f0a"><rect x="580" y="215" width="95" height="88" rx="18"/><path d="M380 325H880Q895 325 903 338L930 385Q940 410 915 410H700L920 735Q928 765 900 765H667V600H590V765H345Q318 765 328 735L555 410H335Q312 410 320 388L350 338Q358 325 380 325Z"/><path fill="#000" d="M627 510L697 560V588L660 596V765H592V596L555 588V560Z"/></g></svg>
+      <div><b>Trạm AI Việt</b><span>Trang quản trị</span></div>
+    </div>
+    <form id="loginForm" style="display:flex;flex-direction:column;gap:12px">
+      <div><label for="pw">Mật khẩu</label><input id="pw" type="password" autocomplete="current-password" required></div>
+      <div class="err" id="loginErr" role="alert"></div>
+      <button class="btn" type="submit" id="loginBtn">Đăng nhập</button>
+    </form>
+  </section>
+
+  <div id="appView" hidden>
+    <header class="top">
+      <div class="brand">
+        <svg viewBox="79 92 1096 1096" role="img" aria-label="Logo Trạm AI Việt"><circle cx="627" cy="640" r="548" fill="#000"/><g transform="translate(0 150)" fill="#ff5f0a"><rect x="580" y="215" width="95" height="88" rx="18"/><path d="M380 325H880Q895 325 903 338L930 385Q940 410 915 410H700L920 735Q928 765 900 765H667V600H590V765H345Q318 765 328 735L555 410H335Q312 410 320 388L350 338Q358 325 380 325Z"/><path fill="#000" d="M627 510L697 560V588L660 596V765H592V596L555 588V560Z"/></g></svg>
+        <div><b>Trạm AI Việt</b><span>Quản trị nội dung</span></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a class="btn ghost sm" href="./" target="_blank" rel="noopener" style="text-decoration:none">Xem trang quà tặng</a>
+        <button class="btn ghost sm" id="logoutBtn" type="button">Thoát</button>
+      </div>
+    </header>
+
+    <div class="tabs" role="tablist" style="margin-top:6px">
+      <button class="tab" role="tab" id="tabContent" aria-selected="true" type="button">Nội dung</button>
+      <button class="tab" role="tab" id="tabStats" aria-selected="false" type="button">Số liệu khách</button>
+    </div>
+
+    <section id="contentView" style="display:flex;flex-direction:column;gap:14px;margin-top:14px">
+      <div class="bar">
+        <p class="hint" style="margin:0">Sửa xong, trang quà tặng cập nhật sau vài phút. Chỉ đưa nội dung miễn phí vào đây, vì trang công khai.</p>
+        <button class="btn" id="addBtn" type="button">+ Thêm mới</button>
+      </div>
+
+      <form id="editor" class="card" hidden>
+        <h2 id="editorTitle">Thêm mới</h2>
+        <div class="grid" style="margin-top:12px">
+          <div><label for="e-title">Tên hiển thị</label><input id="e-title" required maxlength="120"></div>
+          <div><label for="e-type">Loại</label>
+            <select id="e-type">
+              <option value="ô">Ô (chứa các mục bên trong)</option>
+              <option value="video">Video (dán link YouTube)</option>
+              <option value="bài viết">Bài viết</option>
+              <option value="tin tức">Tin tức</option>
+              <option value="link">Link</option>
+              <option value="khóa học">Khóa học</option>
+            </select></div>
+          <div><label for="e-parent">Nằm trong ô</label><select id="e-parent"></select></div>
+          <div><label for="e-ord">Thứ tự (số nhỏ hiện trước)</label><input id="e-ord" type="number" step="1" value="1"></div>
+          <div class="full"><label for="e-desc">Mô tả ngắn</label><input id="e-desc" maxlength="300"></div>
+          <div class="full"><label for="e-val">Link, hoặc nội dung bài viết</label><textarea id="e-val" placeholder="Dán link (https://...) hoặc gõ nội dung bài viết, xuống dòng được."></textarea></div>
+          <div><label for="e-id">Mã (tự tạo từ tên, chỉ đổi khi cần)</label><input id="e-id" maxlength="40" pattern="[a-z0-9\-]+"></div>
+          <div><label for="e-show">Hiển thị</label><select id="e-show"><option value="Có">Hiện</option><option value="Không">Ẩn</option></select></div>
+        </div>
+        <div class="err" id="editErr" role="alert" style="margin-top:8px"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          <button class="btn" type="submit" id="saveBtn">Lưu</button>
+          <button class="btn ghost" type="button" id="cancelBtn">Hủy</button>
+        </div>
+      </form>
+
+      <div id="treeMsg" class="hint">Đang tải…</div>
+      <div id="tree" class="tree"></div>
+    </section>
+
+    <section id="statsView" hidden style="display:none;flex-direction:column;gap:14px;margin-top:14px">
+      <div class="stats" id="statCards"></div>
+      <div class="card"><h2>Khách theo nguồn</h2><div id="bySource" style="margin-top:8px"></div></div>
+      <div class="card"><h2>14 ngày gần nhất</h2><div id="perDay" style="margin-top:8px"></div></div>
+      <p class="hint">Số khách tính theo dòng trong Sheet. Trùng số điện thoại được tự loại từ lúc cài đặt, các dòng cũ không bị đụng tới.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  var API = "https://script.google.com/macros/s/AKfycbx0rgQwUqhMqaHrJxjHxxAlAmdDMPnFI6KkJ5flryQOOlqFzTY-eX9yCC_yN2BgGzb1/exec";
+  var pw = "";
+  var rows = [];
+  var editingId = null;
+  var $ = function(id){ return document.getElementById(id); };
+
+  function store(k, v){ try { if (v == null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch(e){} }
+  function load(k){ try { return sessionStorage.getItem(k) || ""; } catch(e){ return ""; } }
+
+  function call(action, data, tries){
+    tries = tries || 1;
+    var body = JSON.stringify(Object.assign({ pw:pw, action:action }, data || {}));
+    return fetch(API, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:body })
+      .then(function(r){ return r.text(); })
+      .then(function(t){
+        var j; try { j = JSON.parse(t); } catch(e){ j = null; }
+        if (!j || (j.ok === true && j.app)) {
+          if (tries < 4) return call(action, data, tries + 1);
+          throw new Error("Máy chủ chưa trả lời đúng. Thử lại sau vài giây.");
+        }
+        j._tries = tries; return j;
+      });
+  }
+
+  function show(view){
+    $("loginView").hidden = view !== "login";
+    $("appView").hidden = view !== "app";
+  }
+  function slug(s){
+    return String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase()
+      .replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,36);
+  }
+
+  /* đăng nhập */
+  $("loginForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    pw = $("pw").value; $("loginErr").textContent = ""; $("loginBtn").disabled = true;
+    call("login").then(function(j){
+      if (!j.ok) { $("loginErr").textContent = j.error || "Không đăng nhập được."; return; }
+      store("pw", pw); enter();
+    }).catch(function(err){ $("loginErr").textContent = err.message; })
+      .then(function(){ $("loginBtn").disabled = false; });
+  });
+  $("logoutBtn").addEventListener("click", function(){ store("pw", null); pw = ""; $("pw").value = ""; show("login"); });
+
+  function enter(){ show("app"); refresh(); }
+  function refresh(){
+    $("treeMsg").textContent = "Đang tải…";
+    call("list").then(function(j){
+      if (!j.ok) { $("treeMsg").textContent = j.error || "Lỗi tải."; if (/mật khẩu/i.test(j.error||"")) { store("pw", null); show("login"); } return; }
+      rows = j.rows; renderTree(); $("treeMsg").textContent = rows.length ? "" : "Chưa có nội dung. Bấm “Thêm mới”.";
+    }).catch(function(err){ $("treeMsg").textContent = err.message; });
+  }
+
+  /* cây nội dung */
+  function kidsOf(pid){ return rows.filter(function(r){ return (r.parent || "") === pid; }).sort(function(a,b){ return a.ord - b.ord; }); }
+  function renderTree(){
+    var box = $("tree"); box.textContent = "";
+    function walk(pid, depth){
+      kidsOf(pid).forEach(function(r){
+        var it = document.createElement("div"); it.className = "item" + (r.show === "Không" ? " off" : ""); it.style.marginLeft = (depth * 22) + "px";
+        var l = document.createElement("div"); l.className = "l";
+        var t = document.createElement("div"); t.className = "t";
+        var tag = document.createElement("span"); tag.className = "tag"; tag.textContent = r.type; t.appendChild(tag);
+        if (r.show === "Không") { var off = document.createElement("span"); off.className = "tag off"; off.textContent = "ẩn"; t.appendChild(off); }
+        t.appendChild(document.createTextNode(r.title));
+        var m = document.createElement("div"); m.className = "m"; m.textContent = r.id + (r.val && /^https?:/i.test(r.val) ? "  ·  " + r.val : "");
+        l.appendChild(t); l.appendChild(m);
+        var rt = document.createElement("div"); rt.className = "r";
+        function b(text, cls, fn){ var x = document.createElement("button"); x.type = "button"; x.className = "btn sm " + cls; x.textContent = text; x.addEventListener("click", fn); rt.appendChild(x); }
+        if (r.type === "ô" || r.type === "khóa học") b("+ Thêm vào trong", "ghost", function(){ openEditor(null, r.id); });
+        b("Sửa", "ghost", function(){ openEditor(r.id); });
+        b(r.show === "Không" ? "Hiện" : "Ẩn", "ghost", function(){ quickSave(r, { show: r.show === "Không" ? "Có" : "Không" }); });
+        b("Xóa", "danger", function(){ askDelete(r, it); });
+        it.appendChild(l); it.appendChild(rt); box.appendChild(it);
+        walk(r.id, depth + 1);
+      });
+    }
+    walk("", 0);
+  }
+  function quickSave(r, patch){
+    var row = Object.assign({}, r, patch);
+    call("save", { row:row }).then(function(j){ if (!j.ok) alert_(j.error); else refresh(); }).catch(function(e){ alert_(e.message); });
+  }
+  function alert_(msg){ $("treeMsg").textContent = msg; $("treeMsg").className = "err"; setTimeout(function(){ $("treeMsg").className = "hint"; }, 6000); }
+  function askDelete(r, el){
+    if (el.querySelector(".confirm")) return;
+    var c = document.createElement("div"); c.className = "confirm"; c.style.cssText = "width:100%;display:flex;gap:8px;align-items:center;flex-wrap:wrap";
+    var t = document.createElement("span"); t.className = "err"; t.textContent = "Xóa “" + r.title + "”? Không hoàn tác được từ trang này.";
+    var y = document.createElement("button"); y.type = "button"; y.className = "btn sm danger"; y.textContent = "Xóa luôn";
+    var n = document.createElement("button"); n.type = "button"; n.className = "btn sm ghost"; n.textContent = "Không";
+    n.addEventListener("click", function(){ c.remove(); });
+    y.addEventListener("click", function(){
+      y.disabled = true;
+      call("delete", { id:r.id }).then(function(j){
+        if (j.ok || (j._tries > 1 && /Không thấy mã/.test(j.error || ""))) refresh(); else { c.remove(); alert_(j.error); }
+      }).catch(function(e){ c.remove(); alert_(e.message); });
+    });
+    c.appendChild(t); c.appendChild(y); c.appendChild(n); el.appendChild(c);
+  }
+
+  /* form thêm/sửa */
+  function fillParents(selected, selfId){
+    var sel = $("e-parent"); sel.textContent = "";
+    var o0 = document.createElement("option"); o0.value = ""; o0.textContent = "(ngoài cùng)"; sel.appendChild(o0);
+    function blocked(id){ var cur = rows.filter(function(r){ return r.id === id; })[0]; var g = 0; while (cur && g++ < 50) { if (cur.id === selfId) return true; cur = rows.filter(function(r){ return r.id === cur.parent; })[0]; } return false; }
+    function walk(pid, depth){
+      kidsOf(pid).forEach(function(r){
+        if (r.type === "ô" || r.type === "khóa học") {
+          if (!selfId || !blocked(r.id)) {
+            var o = document.createElement("option"); o.value = r.id; o.textContent = new Array(depth + 1).join("— ") + r.title; sel.appendChild(o);
+          }
+        }
+        walk(r.id, depth + 1);
+      });
+    }
+    walk("", 0); sel.value = selected || "";
+  }
+  function openEditor(id, parentPreset){
+    var r = id ? rows.filter(function(x){ return x.id === id; })[0] : null;
+    editingId = r ? r.id : null;
+    $("editorTitle").textContent = r ? "Sửa: " + r.title : "Thêm mới";
+    $("e-title").value = r ? r.title : "";
+    $("e-type").value = r ? r.type : (parentPreset ? "video" : "ô");
+    $("e-desc").value = r ? r.desc : "";
+    $("e-val").value = r ? r.val : "";
+    $("e-ord").value = r ? r.ord : (function(){ var k = kidsOf(parentPreset || ""); return k.length ? k[k.length-1].ord + 1 : 1; })();
+    $("e-id").value = r ? r.id : ""; $("e-id").readOnly = !!r;
+    $("e-show").value = r ? r.show : "Có";
+    fillParents(r ? r.parent : (parentPreset || ""), r ? r.id : null);
+    $("editErr").textContent = ""; $("editor").hidden = false; $("e-title").focus();
+    $("editor").scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+  $("addBtn").addEventListener("click", function(){ openEditor(null, ""); });
+  $("cancelBtn").addEventListener("click", function(){ $("editor").hidden = true; });
+  $("editor").addEventListener("submit", function(e){
+    e.preventDefault();
+    var title = $("e-title").value.trim();
+    var id = $("e-id").value.trim() || slug(title);
+    if (!editingId) { var base = id || "muc", n = 2; while (rows.some(function(r){ return r.id === id; })) id = base + "-" + (n++); }
+    var row = { id:id, parent:$("e-parent").value, type:$("e-type").value, title:title, desc:$("e-desc").value.trim(),
+      val:$("e-val").value, ord:Number($("e-ord").value), show:$("e-show").value };
+    $("saveBtn").disabled = true; $("editErr").textContent = "";
+    call("save", { row:row }).then(function(j){
+      if (!j.ok) { $("editErr").textContent = j.error || "Không lưu được."; return; }
+      $("editor").hidden = true; refresh();
+    }).catch(function(err){ $("editErr").textContent = err.message; })
+      .then(function(){ $("saveBtn").disabled = false; });
+  });
+
+  /* tab */
+  function selectTab(which){
+    $("tabContent").setAttribute("aria-selected", which === "c"); $("tabStats").setAttribute("aria-selected", which === "s");
+    $("contentView").style.display = which === "c" ? "flex" : "none";
+    $("statsView").style.display = which === "s" ? "flex" : "none";
+    if (which === "s") loadStats();
+  }
+  $("tabContent").addEventListener("click", function(){ selectTab("c"); });
+  $("tabStats").addEventListener("click", function(){ selectTab("s"); });
+
+  function loadStats(){
+    var cards = $("statCards"); cards.textContent = "Đang tải…";
+    call("stats").then(function(j){
+      if (!j.ok) { cards.textContent = j.error || "Lỗi."; return; }
+      var s = j.stats; cards.textContent = "";
+      [["Tổng khách", s.total], ["Số điện thoại khác nhau", s.unique], ["Đã đồng ý nhận tin", s.consent]].forEach(function(p){
+        var d = document.createElement("div"); d.className = "stat"; var b = document.createElement("b"); b.textContent = p[1]; var sp = document.createElement("span"); sp.textContent = p[0]; d.appendChild(b); d.appendChild(sp); cards.appendChild(d);
+      });
+      bars($("bySource"), Object.keys(s.bySource).map(function(k){ return [k, s.bySource[k]]; }).sort(function(a,b){ return b[1]-a[1]; }));
+      bars($("perDay"), Object.keys(s.perDay).sort().map(function(k){ return [k.slice(5), s.perDay[k]]; }));
+    }).catch(function(err){ cards.textContent = err.message; });
+  }
+  function bars(box, list){
+    box.textContent = "";
+    var max = Math.max.apply(null, list.map(function(x){ return x[1]; }).concat([1]));
+    if (!list.length) { box.textContent = "Chưa có dữ liệu."; return; }
+    list.forEach(function(p){
+      var r = document.createElement("div"); r.className = "row";
+      var n = document.createElement("div"); n.className = "n"; n.textContent = p[0];
+      var tr = document.createElement("div"); tr.className = "track"; var f = document.createElement("div"); f.className = "fill"; f.style.width = Math.round(p[1] / max * 100) + "%"; tr.appendChild(f);
+      var v = document.createElement("div"); v.className = "v"; v.textContent = p[1];
+      r.appendChild(n); r.appendChild(tr); r.appendChild(v); box.appendChild(r);
+    });
+  }
+
+  pw = load("pw");
+  if (pw) { call("login").then(function(j){ if (j.ok) enter(); else show("login"); }).catch(function(){ show("login"); }); } else show("login");
+})();
+</script>
+</body>
+</html>
