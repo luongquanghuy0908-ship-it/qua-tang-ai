@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap&subset=vietnamese">
-<title>Sách Luật Hấp Dẫn — Trạm AI Việt</title>
+<title>Sách — Trạm AI Việt</title>
 <style>
 :root{
   --ground:#0A192F; --paper:#122A4D; --line:#2B4A7B; --ink:#E2E8F0; --soft:#A9BBD6;
@@ -108,7 +108,9 @@ a.ib{color:inherit;text-decoration:none}
   <div class="row"><label>Màu trang</label><div class="sw" id="sw"></div></div>
   <div class="row"><label>Kiểu chữ có chân (giống sách in)</label><button class="tg" id="tgSerif" aria-label="Kiểu chữ"></button></div>
   <div class="row"><label>Tốc độ đọc</label><input type="range" id="rate" min="0.6" max="2.5" step="0.1"><span class="val" id="rateV">1.0x</span></div>
-  <div class="row"><label>Giọng đọc</label><select id="voice"></select></div>
+  <div class="row"><label>Kiểu giọng</label><select id="engine"><option value="ai">Giọng AI tiếng Việt (tự nhiên)</option><option value="may">Giọng có sẵn của máy</option></select></div>
+  <div id="aiNote" class="warn" style="border-color:var(--line);background:transparent">Giọng AI tải khoảng 63MB ở lần đầu, sau đó lưu trong máy, không cần tải lại.</div>
+  <div class="row" id="voiceRow"><label>Giọng của máy</label><select id="voice"></select></div>
   <div id="voiceWarn"></div>
   <div class="row"><label>Tự lật trang khi đọc</label><button class="tg" id="tgAuto" aria-label="Tự lật trang"></button></div>
   <div class="row"><label>Hiệu ứng lật trang</label><button class="tg" id="tgAnim" aria-label="Hiệu ứng lật"></button></div>
@@ -121,10 +123,11 @@ a.ib{color:inherit;text-decoration:none}
 <div class="meas" id="meas"></div>
 
 <div id="logoSvg" hidden><svg class="logo" viewBox="79 92 1096 1096" role="img" aria-label="Logo Trạm AI Việt"><circle cx="627" cy="640" r="548" fill="#000"/><g transform="translate(0 150)" fill="#ff5f0a"><rect x="580" y="215" width="95" height="88" rx="18"/><path d="M380 325H880Q895 325 903 338L930 385Q940 410 915 410H700L920 735Q928 765 900 765H667V600H590V765H345Q318 765 328 735L555 410H335Q312 410 320 388L350 338Q358 325 380 325Z"/><path fill="#000" d="M627 510L697 560V588L660 596V765H592V596L555 588V560Z"/></g></svg></div>
-<script src="sach.js"></script>
+<script>var BOOK=(new URLSearchParams(location.search).get("b")||"luat-hap-dan").replace(/[^a-z0-9-]/g,"");document.write('<script src="'+BOOK+'.js"><\/script>');</script>
 <script>
 (function(){
   var B = window.SACH;
+  if (!B) { document.body.innerHTML = "<p style='padding:24px'>Không tìm thấy sách này. <a href='../' style='color:#00F5D4'>Về kho quà</a></p>"; return; }
   var $ = function(id){ return document.getElementById(id); };
   var synth = window.speechSynthesis || null;
 
@@ -144,7 +147,7 @@ a.ib{color:inherit;text-decoration:none}
   function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
   function lsSet(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
 
-  var cfg = { fs: 19, theme: "soft", serif: true, rate: 1, voice: "", auto: true, anim: true };
+  var cfg = { engine: "ai", fs: 19, theme: "soft", serif: true, rate: 1, voice: "", auto: true, anim: true };
   try { var c0 = JSON.parse(lsGet(CFGKEY) || "null"); if (c0) for (var k in c0) cfg[k] = c0[k]; } catch(e){}
   function saveCfg(){ lsSet(CFGKEY, JSON.stringify(cfg)); }
   var savedPos = parseInt(lsGet(POSKEY) || "0", 10) || 0;
@@ -285,7 +288,51 @@ a.ib{color:inherit;text-decoration:none}
     }
     $("voiceWarn").innerHTML = voices.length ? "" : "<div class='warn'>Máy chưa có giọng tiếng Việt. Điện thoại thường có sẵn. Trên máy tính, dùng Microsoft Edge hoặc Chrome, hoặc thêm giọng Tiếng Việt trong Cài đặt Windows &gt; Giờ &amp; ngôn ngữ &gt; Giọng nói.</div>";
   }
+  /* ---------- giọng AI (Piper, mã nguồn mở, chạy ngay trong máy) ---------- */
+  var PIPER = "https://cdn.jsdelivr.net/npm/@diffusionstudio/vits-web@1.0.3/+esm", VID = "vi_VN-vais1000-medium";
+  var piper = null, aiReady = false, aiLoading = null, aiCache = {}, aiQ = Promise.resolve();
+  var aud = new Audio(); aud.preload = "auto";
+  var SILENT = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
+  function loadAI(){
+    if (aiLoading) return aiLoading;
+    aiLoading = import(PIPER).then(function(m){
+      piper = m;
+      return m.stored().then(function(s){
+        if (s && s.indexOf(VID) >= 0) return;
+        return m.download(VID, function(p){ if (p && p.total) $("info").textContent = "Tải giọng " + Math.round(p.loaded / p.total * 100) + "%"; });
+      });
+    }).then(function(){ aiReady = true; });
+    aiLoading.catch(function(){ aiLoading = null; });
+    return aiLoading;
+  }
+  function clean(t){ return t.replace(/\.{2,}/g, ",").replace(/\s*[—–]\s*/g, ", "); }
+  function aiGet(i){
+    if (i >= items.length) return null;
+    if (!aiCache[i]) {
+      var p = aiQ.then(function(){ return piper.predict({ text: clean(items[i].t), voiceId: VID }); }).then(function(b){ return URL.createObjectURL(b); });
+      aiQ = p.catch(function(){});
+      aiCache[i] = p;
+    }
+    return aiCache[i];
+  }
+  function aiTrim(i){
+    Object.keys(aiCache).forEach(function(k){ k = +k; if (k < i - 1 || k > i + 6) { aiCache[k].then(function(u){ URL.revokeObjectURL(u); }, function(){}); delete aiCache[k]; } });
+  }
+  function useAI(){ return cfg.engine === "ai"; }
+
   function speakFrom(i){
+    if (useAI()) {
+      try { aud.src = SILENT; aud.play().catch(function(){}); } catch(e){}
+      tk++; var my = tk; playing = true; setPlayIcon();
+      if (aiReady) { readItem(i, my); return; }
+      $("info").textContent = "Đang tải giọng…";
+      loadAI().then(function(){ if (my === tk && playing) readItem(i, my); }, function(){
+        cfg.engine = "may"; saveCfg(); $("engine").value = "may"; showEngine();
+        toast("Không tải được giọng AI, chuyển sang giọng của máy");
+        if (my === tk && playing) speakFrom(i);
+      });
+      return;
+    }
     if (!synth) { toast("Trình duyệt này chưa hỗ trợ đọc thành tiếng"); return; }
     synth.cancel(); tk++; playing = true; setPlayIcon(); readItem(i, tk);
   }
@@ -300,7 +347,20 @@ a.ib{color:inherit;text-decoration:none}
     }
     readIdx = i; mark(); savePos(i);
     $("progI").style.width = Math.round((i + 1) / items.length * 100) + "%";
-    var u = new SpeechSynthesisUtterance(items[i].t.replace(/\.{2,}/g, ",").replace(/\s*[—–]\s*/g, ", "));
+    if (useAI()) {
+      aiTrim(i);
+      var done = false, nx = function(){ if (done) return; done = true; if (my === tk && playing) readItem(i + 1, my); };
+      aiGet(i).then(function(url){
+        if (my !== tk || !playing) return;
+        aud.onended = nx; aud.onerror = nx;
+        aud.src = url; aud.playbackRate = cfg.rate;
+        var pr = aud.play(); if (pr && pr.catch) pr.catch(function(){ playing = false; setPlayIcon(); toast("Bấm nút phát để đọc tiếp"); });
+        aiGet(i + 1); aiGet(i + 2); aiGet(i + 3);
+      }, nx);
+      paint2();
+      return;
+    }
+    var u = new SpeechSynthesisUtterance(clean(items[i].t));
     u.lang = "vi-VN"; u.rate = cfg.rate;
     var v = voices.filter(function(x){ return x.voiceURI === cfg.voice; })[0]; if (v) { u.voice = v; u.lang = v.lang; }
     var next = function(){ clearTimeout(wd); if (my === tk && playing) readItem(i + 1, my); };
@@ -313,6 +373,7 @@ a.ib{color:inherit;text-decoration:none}
   function stopSpeech(keepUi){
     tk++; playing = false; clearTimeout(wd);
     try { if (synth) synth.cancel(); } catch(e){}
+    try { aud.pause(); aud.onended = null; aud.onerror = null; } catch(e){}
     if (!keepUi) setPlayIcon();
   }
   function setPlayIcon(){
@@ -332,6 +393,9 @@ a.ib{color:inherit;text-decoration:none}
     var i = readIdx >= 0 ? readIdx : pages[cur].first;
     speakFrom(i);
   }
+
+  function paint2(){ $("info").textContent = cur === 0 ? "Bìa" : "Trang " + cur + "/" + (pages.length - 1); }
+  function showEngine(){ var ai = useAI(); $("voiceRow").style.display = ai ? "none" : ""; $("voiceWarn").style.display = ai ? "none" : ""; $("aiNote").style.display = ai ? "" : "none"; }
 
   /* ---------- giao diện ---------- */
   var tt = null;
@@ -378,9 +442,10 @@ a.ib{color:inherit;text-decoration:none}
   $("prev").onclick = function(){ manualGo(cur - 1); };
   $("tocBtn").onclick = function(){ openM("mToc"); };
   $("setBtn").onclick = function(){ openM("mSet"); };
-  $("spd").onclick = function(){ cfg.rate = cfg.rate >= 2.5 ? 0.8 : Math.min(2.5, Math.round((cfg.rate + 0.2) * 10) / 10); saveCfg(); spdLabel(); if (playing) speakFrom(readIdx >= 0 ? readIdx : pages[cur].first); };
-  $("rate").oninput = function(){ cfg.rate = parseFloat(this.value); saveCfg(); spdLabel(); };
-  $("rate").onchange = function(){ if (playing) speakFrom(readIdx >= 0 ? readIdx : pages[cur].first); };
+  $("spd").onclick = function(){ cfg.rate = cfg.rate >= 2.5 ? 0.8 : Math.min(2.5, Math.round((cfg.rate + 0.2) * 10) / 10); saveCfg(); spdLabel(); if (useAI()) { try { aud.playbackRate = cfg.rate; } catch(e){} } else if (playing) speakFrom(readIdx >= 0 ? readIdx : pages[cur].first); };
+  $("rate").oninput = function(){ cfg.rate = parseFloat(this.value); saveCfg(); spdLabel(); try { aud.playbackRate = cfg.rate; } catch(e){} };
+  $("engine").onchange = function(){ var was = playing, at = readIdx >= 0 ? readIdx : pages[cur].first; stopSpeech(); cfg.engine = this.value; saveCfg(); showEngine(); if (useAI()) loadAI().catch(function(){}); if (was) speakFrom(at); };
+  $("rate").onchange = function(){ if (playing && !useAI()) speakFrom(readIdx >= 0 ? readIdx : pages[cur].first); };
   $("voice").onchange = function(){ cfg.voice = this.value; saveCfg(); if (playing) speakFrom(readIdx >= 0 ? readIdx : pages[cur].first); };
   $("fsM").onclick = function(){ cfg.fs = Math.max(14, cfg.fs - 1); $("fsV").textContent = cfg.fs; saveCfg(); relayout(); };
   $("fsP").onclick = function(){ cfg.fs = Math.min(32, cfg.fs + 1); $("fsV").textContent = cfg.fs; saveCfg(); relayout(); };
@@ -401,8 +466,9 @@ a.ib{color:inherit;text-decoration:none}
   window.addEventListener("pagehide", function(){ try { if (synth) synth.cancel(); } catch(e){} });
 
   /* ---------- khởi động ---------- */
-  $("ttl").textContent = B.title + " — " + B.sub;
-  $("fsV").textContent = cfg.fs;
+  $("ttl").textContent = B.title + " — " + B.sub; document.title = B.title + " — Trạm AI Việt";
+  $("fsV").textContent = cfg.fs; $("engine").value = cfg.engine; showEngine();
+  if (useAI()) import(PIPER).then(function(m){ piper = m; return m.stored(); }).then(function(s){ if (s && s.indexOf(VID) >= 0) { aiLoading = Promise.resolve(); aiReady = true; } }).catch(function(){});
   tg("tgSerif", "serif"); tg("tgAuto", "auto"); tg("tgAnim", "anim");
   buildSw(); buildToc(); spdLabel();
   applyTheme(); paginate();
