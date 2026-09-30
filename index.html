@@ -123,6 +123,9 @@ h1 mark::after{content:"";position:absolute;left:0;right:0;bottom:.02em;height:.
 .contact .c-zalo{background:#0068FF}
 .contact .c-yt{background:#E62117}
 .contact .c-tg{background:#229ED9}
+.contact-note{margin:8px 0 22px;font-size:13.5px;color:var(--ink-soft);line-height:1.45}
+footer .contact-note{text-align:center;margin:0 0 16px}
+.contact-note b{color:var(--zalo);font-weight:700}
 .contact-bar{width:100%;max-width:1080px;margin:0 auto;flex-wrap:nowrap}
 .contact-bar a{flex:1;padding:12px 8px;font-size:15px}
 .top{flex-wrap:wrap}
@@ -216,7 +219,7 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
       <span class="tag">Quà tặng 100% miễn phí · Chạy trên Google Flow</span>
       <h1>Tặng <mark>miễn phí</mark> tool làm video AI</h1>
       <p class="lead">Không cần biết dựng, không mất một đồng. Chỉ cần điền 3 thông tin là nhận miễn phí liền 3 món quà: tool tạo video AI, tool tạo ảnh AI và bộ prompt tạo video soạn sẵn. Bấm vào là dùng, không phải cài gì.</p>
-      <nav class="contact" data-contact aria-label="Liên hệ Trạm AI Việt" style="margin:-8px 0 24px"></nav>
+      <nav class="contact" data-contact data-note aria-label="Liên hệ Trạm AI Việt" style="margin:-8px 0 8px"></nav>
 
       <ul class="gifts">
         <li class="gift">
@@ -275,7 +278,7 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     </div>
     <h2 id="rewardTitle">Kho quà của bạn đây</h2>
     <p class="who" id="who" hidden>Trang đã nhớ bạn trên máy này. Không phải bạn? <button id="forgetBtn" type="button" class="linkish">Đổi thông tin</button></p>
-    <nav class="contact" data-contact aria-label="Liên hệ Trạm AI Việt" style="margin:0 0 18px"></nav>
+    <nav class="contact" data-contact data-note aria-label="Liên hệ Trạm AI Việt" style="margin:0"></nav>
 
     <nav class="crumbs" id="crumbs" aria-label="Đường dẫn"></nav>
     <div id="lib" aria-live="polite"></div>
@@ -304,7 +307,7 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
 
   </div>
 
-  <footer><nav class="contact" data-contact aria-label="Liên hệ Trạm AI Việt" style="justify-content:center;margin-bottom:12px"></nav>© 2026 Trạm AI Việt</footer>
+  <footer><nav class="contact" data-contact data-note aria-label="Liên hệ Trạm AI Việt" style="justify-content:center;margin-bottom:12px"></nav>© 2026 Trạm AI Việt</footer>
 </div>
 
 <div class="bar" id="bar" role="region" aria-label="Liên hệ Trạm AI Việt">
@@ -326,7 +329,9 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     yt:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2C2 8.8 2 12 2 12s0 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8zM10 15V9l5.2 3z"/></svg>',
     tg:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M21.9 4.3 2.7 11.7c-1.3.5-1.3 1.3-.2 1.6l4.9 1.5 1.9 5.8c.2.6.1.9.8.9.5 0 .7-.2 1-.5l2.4-2.3 5 3.7c.9.5 1.6.2 1.8-.9l3.3-15.6c.3-1.4-.5-2-1.7-1.6zM8.5 13.9l9.3-5.9c.4-.3.8-.1.5.2l-7.6 6.9-.3 3.2-1.9-4.4z"/></svg>'
   };
-  var LABEL = { zalo:"Nhóm Zalo", yt:"YouTube", tg:"Telegram" };
+  var ZALO_MEMBERS = "";
+  var NOTE = "Vào <b>nhóm Zalo</b> cùng anh em: hỏi đáp, cập nhật tool mới, tham khảo tài khoản AI giá tốt.";
+  var LABEL = { zalo:"Nhóm Zalo" + (ZALO_MEMBERS ? " · " + ZALO_MEMBERS + " thành viên" : ""), yt:"YouTube", tg:"Telegram" };
   document.querySelectorAll("[data-contact]").forEach(function(box){
     ["zalo","yt","tg"].forEach(function(k){
       if (!CONTACT[k]) return;
@@ -335,6 +340,10 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
       a.innerHTML = ICON[k] + "<span>" + LABEL[k] + "</span>";
       box.appendChild(a);
     });
+    if (box.hasAttribute("data-note")) {
+      var p = document.createElement("p"); p.className = "contact-note"; p.innerHTML = NOTE;
+      box.parentNode.insertBefore(p, box.nextSibling);
+    }
   });
   var LINKS = {
     v:"https://flow.google.com/shared/tool/a91b7c88-a507-45f1-813b-dbc9f68b0b6d",
