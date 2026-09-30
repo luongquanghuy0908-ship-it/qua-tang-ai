@@ -279,7 +279,9 @@ a.ib{color:inherit;text-decoration:none}
     var all = synth.getVoices() || [];
     voices = all.filter(function(v){ return /^vi/i.test(v.lang); });
     var sel = $("voice"); sel.innerHTML = "";
-    if (!voices.length) sel.innerHTML = "<option value=''>Mặc định của máy</option>";
+    var mo = document.querySelector("#engine option[value='may']");
+    if (mo) mo.hidden = mo.disabled = !voices.length;
+    if (!voices.length && cfg.engine === "may") { cfg.engine = "vi_VN-vais1000-medium:0"; saveCfg(); setVoice(); $("engine").value = cfg.engine; showEngine(); }
     voices.forEach(function(v){ var o = document.createElement("option"); o.value = v.voiceURI; o.textContent = v.name; sel.appendChild(o); });
     if (voices.length) {
       var pick = voices.filter(function(v){ return v.voiceURI === cfg.voice; })[0] ||
@@ -335,13 +337,12 @@ a.ib{color:inherit;text-decoration:none}
       if (aiReady) { readItem(i, my); return; }
       $("info").textContent = "Đang tải giọng…";
       loadAI().then(function(){ if (my === tk && playing) readItem(i, my); }, function(){
-        cfg.engine = "may"; saveCfg(); $("engine").value = "may"; showEngine();
-        toast("Không tải được giọng AI, chuyển sang giọng của máy");
-        if (my === tk && playing) speakFrom(i);
+        playing = false; setPlayIcon(); paint2();
+        toast("Chưa tải được giọng AI, kiểm tra mạng rồi bấm phát lại");
       });
       return;
     }
-    if (!synth) { toast("Trình duyệt này chưa hỗ trợ đọc thành tiếng"); return; }
+    if (!synth || !voices.length) { cfg.engine = "vi_VN-vais1000-medium:0"; saveCfg(); setVoice(); $("engine").value = cfg.engine; showEngine(); toast("Máy không có giọng tiếng Việt, dùng giọng AI tiếng Việt"); speakFrom(i); return; }
     synth.cancel(); tk++; playing = true; setPlayIcon(); readItem(i, tk);
   }
   function readItem(i, my){
@@ -370,7 +371,7 @@ a.ib{color:inherit;text-decoration:none}
     }
     var u = new SpeechSynthesisUtterance(clean(items[i].t));
     u.lang = "vi-VN"; u.rate = cfg.rate;
-    var v = voices.filter(function(x){ return x.voiceURI === cfg.voice; })[0]; if (v) { u.voice = v; u.lang = v.lang; }
+    var v = voices.filter(function(x){ return x.voiceURI === cfg.voice; })[0] || voices[0]; u.voice = v; u.lang = v.lang;
     var next = function(){ clearTimeout(wd); if (my === tk && playing) readItem(i + 1, my); };
     u.onend = next;
     u.onerror = function(e){ if (e && (e.error === "canceled" || e.error === "interrupted")) return; next(); };
@@ -489,7 +490,7 @@ a.ib{color:inherit;text-decoration:none}
   paint();
   if (savedPos > 0) toast("Bạn đang đọc dở, bấm phát để đọc tiếp");
   if (synth) { loadVoices(); if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices; }
-  else $("voiceWarn").innerHTML = "<div class='warn'>Trình duyệt này chưa hỗ trợ đọc thành tiếng.</div>";
+  else { var mo0 = document.querySelector("#engine option[value='may']"); if (mo0) mo0.hidden = mo0.disabled = true; if (cfg.engine === "may") { cfg.engine = "vi_VN-vais1000-medium:0"; setVoice(); $("engine").value = cfg.engine; showEngine(); } }
 })();
 </script>
 </body>
