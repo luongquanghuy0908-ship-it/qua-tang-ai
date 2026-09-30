@@ -111,6 +111,10 @@ h1 mark::after{content:"";position:absolute;left:0;right:0;bottom:.02em;height:.
 .lib-view .body p{margin:0 0 12px;overflow-wrap:anywhere}
 .lib-view .link-btn{justify-self:start}
 
+.who{margin:-12px 0 18px;font-size:14px;color:var(--ink-soft)}
+.linkish{appearance:none;background:none;border:0;padding:0;font:inherit;color:var(--zalo);text-decoration:underline;cursor:pointer}
+.linkish:focus-visible{outline:3px solid var(--gift);outline-offset:2px;border-radius:4px}
+
 /* reward */
 .reward{padding-block:8px 48px}
 .unlocked{display:flex;align-items:center;gap:10px;color:var(--ok);font-weight:800;font-size:14px;letter-spacing:.06em;text-transform:uppercase}
@@ -250,7 +254,7 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
         Nhận quà miễn phí
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
       </button>
-      <p class="fine">Thông tin chỉ dùng để gửi quà, hỗ trợ và liên hệ bạn, không chia sẻ cho bên khác.</p>
+      <p class="fine">Thông tin chỉ dùng để gửi quà, hỗ trợ và liên hệ bạn, không chia sẻ cho bên khác. Trang sẽ nhớ bạn trên máy này để lần sau vào thẳng.</p>
     </form>
   </section>
 
@@ -260,6 +264,7 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
       Đã mở khoá
     </div>
     <h2 id="rewardTitle">Kho quà của bạn đây</h2>
+    <p class="who" id="who" hidden>Trang đã nhớ bạn trên máy này. Không phải bạn? <button id="forgetBtn" type="button" class="linkish">Đổi thông tin</button></p>
 
     <nav class="crumbs" id="crumbs" aria-label="Đường dẫn"></nav>
     <div id="lib" aria-live="polite"></div>
@@ -469,7 +474,7 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
       render();
       if (started) crumbEl.scrollIntoView({ behavior: "auto", block: "start" });
     });
-    return { start:function(){ if (started) return; started = true; if (!/^#\/./.test(location.hash)) location.hash = "#/"; load(); } };
+    return { start:function(){ if (started) return; started = true; if (!/^#\/./.test(location.hash)) { try { history.replaceState(null, "", location.pathname + location.search + "#/"); } catch (e) {} } load(); } };
   })();
 
   var form = document.getElementById("leadForm");
@@ -498,14 +503,21 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     return ok ? { name:name, phone:phone, mail:mail } : null;
   }
 
-  function unlock(name){
+  var KEY = "tav_khach_v1";
+  function saveMe(d){ try { localStorage.setItem(KEY, JSON.stringify({ name:d.name, phone:d.phone, mail:d.mail, t:Date.now() })); } catch(e){} }
+  function loadMe(){ try { var j = JSON.parse(localStorage.getItem(KEY) || "null"); return j && j.name && j.phone ? j : null; } catch(e){ return null; } }
+  function forgetMe(){ try { localStorage.removeItem(KEY); } catch(e){} }
+  document.getElementById("forgetBtn").addEventListener("click", function(){ forgetMe(); location.href = location.pathname + location.search; });
+
+  function unlock(name, quiet){
     if (name) document.getElementById("rewardTitle").textContent = "Kho quà của " + name.split(" ").pop() + " đây";
     document.getElementById("gate").hidden = true;
     var r = document.getElementById("reward");
     r.hidden = false;
     Lib.start();
     ["after","bar","ytTop"].forEach(function(id){ document.getElementById(id).hidden = false; });
-    r.scrollIntoView({ behavior:"smooth", block:"start" });
+    document.getElementById("who").hidden = false;
+    if (!quiet) r.scrollIntoView({ behavior:"smooth", block:"start" });
   }
 
   function send(data){
@@ -540,9 +552,13 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     btn.disabled = true;
     btn.firstChild.textContent = "Đang mở khoá… ";
     send(data).then(function(){
+      saveMe(data);
       unlock(data.name);
     });
   });
+
+  var me = loadMe();
+  if (me) unlock(me.name, true);
 
 })();
 </script>
