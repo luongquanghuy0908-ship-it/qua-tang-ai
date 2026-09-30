@@ -24,16 +24,13 @@ button{font:inherit;color:inherit;cursor:pointer}
 a.ib{color:inherit;text-decoration:none}
 .wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:14px 12px}
 .stage{position:relative;perspective:1800px;width:100%;max-width:560px;height:100%}
-.page{position:absolute;inset:0;background:var(--page);color:var(--pink);border-radius:6px 14px 14px 6px;box-shadow:0 10px 34px rgba(0,0,0,.45),inset 10px 0 14px -10px rgba(0,0,0,.35);padding:26px 26px 40px 30px;overflow:hidden;line-height:1.7;backface-visibility:hidden}
-.page.top{transform-origin:left center;z-index:2}
-.page.out{animation:pgout .62s cubic-bezier(.5,0,.75,.4) forwards}
-.page.in{animation:pgin .62s cubic-bezier(.25,.6,.5,1) forwards}
-@keyframes pgout{0%{transform:rotateY(0);filter:brightness(1)}70%{filter:brightness(.8)}100%{transform:rotateY(-105deg);filter:brightness(.6);opacity:0}}
-@keyframes pgin{0%{transform:rotateY(-105deg);filter:brightness(.6);opacity:0}30%{opacity:1}100%{transform:rotateY(0);filter:brightness(1)}}
-.page h2{margin:0 0 .7em;font-size:1.25em;line-height:1.35}
-.page p{margin:0 0 .85em}
-.page .s{cursor:pointer;border-radius:4px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
-.page .s.cur{background:var(--hl)}
+#book{margin:0 auto}
+.pg{background:var(--page);color:var(--pink);padding:26px 26px 40px 30px;overflow:hidden;line-height:1.7;box-sizing:border-box;position:relative;border-radius:4px 10px 10px 4px;box-shadow:inset 12px 0 16px -12px rgba(0,0,0,.28)}
+.stf__parent{margin:0 auto}
+.pg h2{margin:0 0 .7em;font-size:1.25em;line-height:1.35}
+.pg p{margin:0 0 .85em}
+.pg .s{cursor:pointer;border-radius:4px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.pg .s.cur{background:var(--hl)}
 .pnum{position:absolute;left:0;right:0;bottom:12px;text-align:center;font-size:13px;opacity:.6}
 .cover{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;gap:10px}
 .cover .logo{width:64px;height:64px}
@@ -75,7 +72,6 @@ a.ib{color:inherit;text-decoration:none}
 .meas{position:absolute;visibility:hidden;left:-9999px;top:0;padding:26px 26px 40px 30px;line-height:1.7;overflow:hidden}
 .meas h2{margin:0 0 .7em;font-size:1.25em;line-height:1.35}
 .meas p{margin:0 0 .85em}
-@media (prefers-reduced-motion:reduce){.page.out,.page.in{animation-duration:.01s}}
 </style>
 </head>
 <body>
@@ -87,8 +83,7 @@ a.ib{color:inherit;text-decoration:none}
 </div>
 
 <div class="wrap"><div class="stage" id="stage">
-  <div class="page" id="under"></div>
-  <div class="page top" id="topPg"></div>
+
 </div></div>
 
 <div class="bar">
@@ -123,6 +118,7 @@ a.ib{color:inherit;text-decoration:none}
 <div class="meas" id="meas"></div>
 
 <div id="logoSvg" hidden><svg class="logo" viewBox="79 92 1096 1096" role="img" aria-label="Logo Trạm AI Việt"><circle cx="627" cy="640" r="548" fill="#000"/><g transform="translate(0 150)" fill="#ff5f0a"><rect x="580" y="215" width="95" height="88" rx="18"/><path d="M380 325H880Q895 325 903 338L930 385Q940 410 915 410H700L920 735Q928 765 900 765H667V600H590V765H345Q318 765 328 735L555 410H335Q312 410 320 388L350 338Q358 325 380 325Z"/><path fill="#000" d="M627 510L697 560V588L660 596V765H592V596L555 588V560Z"/></g></svg></div>
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 <script>var BOOK=(new URLSearchParams(location.search).get("b")||"luat-hap-dan").replace(/[^a-z0-9-]/g,"");document.write('<script src="'+BOOK+'.js"><\/script>');</script>
 <script>
 (function(){
@@ -232,38 +228,51 @@ a.ib{color:inherit;text-decoration:none}
     return out + "<div class='pnum'>" + n + " / " + (pages.length - 1) + "</div>";
   }
 
-  /* ---------- hiển thị + lật ---------- */
-  var readIdx = -1;
+  /* ---------- hiển thị + lật (thư viện page-flip: giấy cong như sách thật) ---------- */
+  var readIdx = -1, pf = null, flipDone = null, fromCode = false, silent = false;
+  function buildBook(){
+    var st = $("stage");
+    if (pf) { try { pf.destroy(); } catch(e){} pf = null; }
+    st.innerHTML = "";
+    var bk = document.createElement("div"); bk.id = "book"; st.appendChild(bk);
+    for (var n = 0; n < pages.length; n++) { var d = document.createElement("div"); d.className = "pg"; d.innerHTML = html(n); bk.appendChild(d); }
+    var W = st.clientWidth, H = st.clientHeight;
+    if (!window.St || !St.PageFlip) { fallback = true; return; }
+    pf = new St.PageFlip(bk, { width: W, height: H, size: "fixed", usePortrait: true, showCover: false, drawShadow: true,
+      maxShadowOpacity: 0.45, flippingTime: 900, mobileScrollSupport: false, disableFlipByClick: true, clickEventForward: true,
+      showPageCorners: true, startPage: cur, autoSize: false, swipeDistance: 20 });
+    pf.loadFromHTML(bk.querySelectorAll(".pg"));
+    pf.on("flip", function(e){
+      if (silent) return;
+      var n = e.data, byCode = fromCode; fromCode = false;
+      if (n === cur && !flipDone) return;
+      cur = n; paint();
+      if (flipDone) { var f = flipDone; flipDone = null; f(); return; }
+      if (!byCode) { readIdx = -1; var was = playing; if (was) stopSpeech(true); if (pages[cur].first != null) savePos(cur === 0 ? 0 : pages[cur].first); if (was && cur > 0) speakFrom(pages[cur].first); else paint(); }
+    });
+    
+  }
+  var fallback = false;
   function paint(){
-    var top = $("topPg");
-    top.innerHTML = html(cur);
+    if (fallback) { var st = $("stage"); st.innerHTML = "<div class='pg' style='height:100%'>" + html(cur) + "</div>"; }
     mark();
-    var go = $("goBtn"); if (go) go.onclick = function(){ startFromSaved(); };
     $("info").textContent = cur === 0 ? "Bìa" : "Trang " + cur + "/" + (pages.length - 1);
     var lastI = pages[cur].last >= 0 ? pages[cur].last : 0;
     var ref = readIdx >= 0 ? readIdx : lastI;
     $("progI").style.width = Math.round((cur === 0 ? 0 : (ref + 1) / items.length) * 100) + "%";
   }
   function mark(){
-    var old = document.querySelector(".s.cur"); if (old) old.classList.remove("cur");
-    if (readIdx >= 0) { var e = document.querySelector(".s[data-i='" + readIdx + "']"); if (e) e.classList.add("cur"); }
+    Array.prototype.forEach.call(document.querySelectorAll(".s.cur"), function(o){ o.classList.remove("cur"); });
+    if (readIdx >= 0) Array.prototype.forEach.call(document.querySelectorAll(".s[data-i='" + readIdx + "']"), function(e){ e.classList.add("cur"); });
   }
   function show(n, done){
-    if (n < 0 || n >= pages.length || n === cur && !done) { if (done) done(); return; }
-    var top = $("topPg"), under = $("under"), dir = n > cur ? 1 : -1;
-    if (!cfg.anim || busy) { cur = n; paint(); if (done) done(); return; }
-    busy = true;
-    function fin(){ top.className = "page top"; busy = false; if (done) done(); }
-    if (dir > 0) {
-      under.innerHTML = html(n); var old = cur; cur = n;
-      top.classList.add("out");
-      setTimeout(function(){ fin(); paint(); }, 640);
-    } else {
-      under.innerHTML = html(cur); cur = n;
-      top.innerHTML = html(n); mark();
-      top.classList.add("in");
-      setTimeout(function(){ fin(); paint(); }, 640);
-    }
+    if (n < 0 || n >= pages.length) { if (done) done(); return; }
+    if (n === cur) { paint(); if (done) done(); return; }
+    if (!pf) { cur = n; paint(); if (done) done(); return; }
+    var busyNow = false; try { busyNow = pf.getState && pf.getState() !== "read"; } catch(e){}
+    flipDone = done || null; fromCode = true;
+    if (!cfg.anim || busyNow || Math.abs(n - cur) > 1) (function(){ silent = true; try { pf.turnToPage(n); } catch(e){} silent = false; var f = flipDone; flipDone = null; fromCode = false; cur = n; paint(); if (f) f(); })();
+    else pf.flip(n, n > cur ? "bottom" : "top");
   }
   function manualGo(n){
     if (n < 0 || n >= pages.length) return;
@@ -291,7 +300,7 @@ a.ib{color:inherit;text-decoration:none}
     $("voiceWarn").innerHTML = voices.length ? "" : "<div class='warn'>Máy chưa có giọng tiếng Việt. Điện thoại thường có sẵn. Trên máy tính, dùng Microsoft Edge hoặc Chrome, hoặc thêm giọng Tiếng Việt trong Cài đặt Windows &gt; Giờ &amp; ngôn ngữ &gt; Giọng nói.</div>";
   }
   /* ---------- giọng AI (Piper, mã nguồn mở, chạy ngay trong máy) ---------- */
-  var PIPER = "piper-vi.js";
+  var PIPER = "./piper-vi.js";
   var VOICES = [["Nữ 1 — rõ nhất", "vi_VN-vais1000-medium", 0]];
   [18, 27, 17, 31, 13, 24, 62].forEach(function(sp, k){ VOICES.push(["Nữ " + (k + 2), "vi_VN-vivos-x_low", sp]); });
   [45, 54, 41, 50, 33, 47, 30].forEach(function(sp, k){ VOICES.push(["Nam " + (k + 1), "vi_VN-vivos-x_low", sp]); });
@@ -307,8 +316,11 @@ a.ib{color:inherit;text-decoration:none}
     if (aiLoading) return aiLoading;
     aiLoading = import(PIPER).then(function(m){
       piper = m;
-      return m.stored().then(function(s){
-        if (s && s.indexOf(VID) >= 0) return;
+      var canSave = !!(navigator.storage && navigator.storage.getDirectory);
+      if (!canSave) return m.predict({ text: "a", voiceId: VID, speakerId: SPK });
+      return m.stored().catch(function(){ return null; }).then(function(s){
+        if (s === null) return m.predict({ text: "a", voiceId: VID, speakerId: SPK });
+        if (s.indexOf(VID) >= 0) return;
         return m.download(VID, function(p){ if (p && p.total) $("info").textContent = "Tải giọng " + Math.round(p.loaded / p.total * 100) + "%"; });
       });
     }).then(function(){ aiReady = true; });
@@ -336,9 +348,11 @@ a.ib{color:inherit;text-decoration:none}
       tk++; var my = tk; playing = true; setPlayIcon();
       if (aiReady) { readItem(i, my); return; }
       $("info").textContent = "Đang tải giọng…";
-      loadAI().then(function(){ if (my === tk && playing) readItem(i, my); }, function(){
+      loadAI().then(function(){ if (my === tk && playing) readItem(i, my); }, function(err){
+        try { console.error(err); } catch(e){}
+        var why = String(err && err.message || err || "").slice(0, 90);
         playing = false; setPlayIcon(); paint2();
-        toast("Chưa tải được giọng AI, kiểm tra mạng rồi bấm phát lại");
+        toast("Chưa tải được giọng AI (" + why + "). Kiểm tra mạng rồi bấm phát lại. Nếu đang mở trong Zalo/Facebook, hãy mở bằng Chrome.");
       });
       return;
     }
@@ -408,7 +422,7 @@ a.ib{color:inherit;text-decoration:none}
 
   /* ---------- giao diện ---------- */
   var tt = null;
-  function toast(m){ var t = $("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(tt); tt = setTimeout(function(){ t.classList.remove("on"); }, 2600); }
+  function toast(m){ var t = $("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(tt); tt = setTimeout(function(){ t.classList.remove("on"); }, Math.max(2600, m.length * 70)); }
   function openM(id){ $(id).classList.add("on"); }
   function closeAll(){ Array.prototype.forEach.call(document.querySelectorAll(".mask"), function(m){ m.classList.remove("on"); }); }
   function tg(id, key){
@@ -420,7 +434,7 @@ a.ib{color:inherit;text-decoration:none}
     var anchor = readIdx >= 0 ? readIdx : (cur > 0 ? pages[cur].first : savedPos);
     applyTheme(); paginate();
     cur = anchor > 0 ? pageOf(anchor) : 0;
-    paint();
+    buildBook(); paint();
   }
   function buildSw(){
     var sw = $("sw"); sw.innerHTML = "";
@@ -440,9 +454,21 @@ a.ib{color:inherit;text-decoration:none}
     });
   }
 
+  /* chạm nhẹ vào một câu (không kéo) = đọc từ câu đó; thư viện lật trang nuốt sự kiện click nên bắt ở pointerdown/up */
+  var pd = null;
+  window.addEventListener("pointerdown", function(e){ pd = { x: e.clientX, y: e.clientY, t: Date.now() }; }, true);
+  window.addEventListener("pointerup", function(e){
+    if (!pd) return; var d = pd; pd = null;
+    if (Math.abs(e.clientX - d.x) > 6 || Math.abs(e.clientY - d.y) > 6 || Date.now() - d.t > 600) return;
+    var els = document.elementsFromPoint ? document.elementsFromPoint(e.clientX, e.clientY) : [e.target];
+    for (var k = 0; k < els.length; k++) {
+      if (els[k].id === "goBtn") { startFromSaved(); return; }
+      var s = els[k].closest && els[k].closest(".s");
+      if (s && s.dataset.i != null && $("stage").contains(s)) { speakFrom(parseInt(s.dataset.i, 10)); return; }
+      if (els[k].classList && els[k].classList.contains("mask")) break;
+    }
+  }, true);
   document.addEventListener("click", function(e){
-    var s = e.target.closest && e.target.closest(".s");
-    if (s && s.dataset.i != null) { speakFrom(parseInt(s.dataset.i, 10)); return; }
     if (e.target.hasAttribute && e.target.hasAttribute("data-close")) closeAll();
     if (e.target.classList && e.target.classList.contains("mask")) closeAll();
   });
@@ -487,7 +513,7 @@ a.ib{color:inherit;text-decoration:none}
   buildSw(); buildToc(); spdLabel();
   applyTheme(); paginate();
   cur = savedPos > 0 ? pageOf(savedPos) : 0;
-  paint();
+  buildBook(); paint();
   if (savedPos > 0) toast("Bạn đang đọc dở, bấm phát để đọc tiếp");
   if (synth) { loadVoices(); if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices; }
   else { var mo0 = document.querySelector("#engine option[value='may']"); if (mo0) mo0.hidden = mo0.disabled = true; if (cfg.engine === "may") { cfg.engine = "vi_VN-vais1000-medium:0"; setVoice(); $("engine").value = cfg.engine; showEngine(); } }
