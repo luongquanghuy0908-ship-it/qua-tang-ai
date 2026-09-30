@@ -108,8 +108,8 @@ a.ib{color:inherit;text-decoration:none}
   <div class="row"><label>Màu trang</label><div class="sw" id="sw"></div></div>
   <div class="row"><label>Kiểu chữ có chân (giống sách in)</label><button class="tg" id="tgSerif" aria-label="Kiểu chữ"></button></div>
   <div class="row"><label>Tốc độ đọc</label><input type="range" id="rate" min="0.6" max="2.5" step="0.1"><span class="val" id="rateV">1.0x</span></div>
-  <div class="row"><label>Kiểu giọng</label><select id="engine"><option value="ai">Giọng AI tiếng Việt (tự nhiên)</option><option value="may">Giọng có sẵn của máy</option></select></div>
-  <div id="aiNote" class="warn" style="border-color:var(--line);background:transparent">Giọng AI tải khoảng 63MB ở lần đầu, sau đó lưu trong máy, không cần tải lại.</div>
+  <div class="row"><label>Giọng đọc</label><select id="engine"></select></div>
+  <div id="aiNote" class="warn" style="border-color:var(--line);background:transparent">Giọng AI tải ở lần đầu (Nữ 1 khoảng 63MB, các giọng còn lại dùng chung gói 28MB), sau đó lưu trong máy, không cần tải lại.</div>
   <div class="row" id="voiceRow"><label>Giọng của máy</label><select id="voice"></select></div>
   <div id="voiceWarn"></div>
   <div class="row"><label>Tự lật trang khi đọc</label><button class="tg" id="tgAuto" aria-label="Tự lật trang"></button></div>
@@ -147,7 +147,7 @@ a.ib{color:inherit;text-decoration:none}
   function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
   function lsSet(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
 
-  var cfg = { engine: "ai", fs: 19, theme: "soft", serif: true, rate: 1, voice: "", auto: true, anim: true };
+  var cfg = { engine: "vi_VN-vais1000-medium:0", fs: 19, theme: "soft", serif: true, rate: 1, voice: "", auto: true, anim: true };
   try { var c0 = JSON.parse(lsGet(CFGKEY) || "null"); if (c0) for (var k in c0) cfg[k] = c0[k]; } catch(e){}
   function saveCfg(){ lsSet(CFGKEY, JSON.stringify(cfg)); }
   var savedPos = parseInt(lsGet(POSKEY) || "0", 10) || 0;
@@ -289,8 +289,16 @@ a.ib{color:inherit;text-decoration:none}
     $("voiceWarn").innerHTML = voices.length ? "" : "<div class='warn'>Máy chưa có giọng tiếng Việt. Điện thoại thường có sẵn. Trên máy tính, dùng Microsoft Edge hoặc Chrome, hoặc thêm giọng Tiếng Việt trong Cài đặt Windows &gt; Giờ &amp; ngôn ngữ &gt; Giọng nói.</div>";
   }
   /* ---------- giọng AI (Piper, mã nguồn mở, chạy ngay trong máy) ---------- */
-  var PIPER = "https://cdn.jsdelivr.net/npm/@diffusionstudio/vits-web@1.0.3/+esm", VID = "vi_VN-vais1000-medium";
+  var PIPER = "piper-vi.js";
+  var VOICES = [["Nữ 1 — rõ nhất", "vi_VN-vais1000-medium", 0]];
+  [18, 27, 17, 31, 13, 24, 62].forEach(function(sp, k){ VOICES.push(["Nữ " + (k + 2), "vi_VN-vivos-x_low", sp]); });
+  [45, 54, 41, 50, 33, 47, 30].forEach(function(sp, k){ VOICES.push(["Nam " + (k + 1), "vi_VN-vivos-x_low", sp]); });
+  VOICES.push(["Nam 8 — trầm", "vi_VN-vivos-x_low", 57]);
+  if (!/^vi_VN-[a-z0-9_-]+:\d+$|^may$/.test(cfg.engine)) cfg.engine = "vi_VN-vais1000-medium:0";
+  var VID = "", SPK = 0;
+  function setVoice(){ if (cfg.engine === "may") return; var p = cfg.engine.split(":"); if (p[0] !== VID || +p[1] !== SPK) { aiClear(); if (p[0] !== VID) { aiReady = false; aiLoading = null; } VID = p[0]; SPK = +p[1]; } }
   var piper = null, aiReady = false, aiLoading = null, aiCache = {}, aiQ = Promise.resolve();
+  function aiClear(){ Object.keys(aiCache).forEach(function(k){ aiCache[k].then(function(u){ URL.revokeObjectURL(u); }, function(){}); }); aiCache = {}; }
   var aud = new Audio(); aud.preload = "auto";
   var SILENT = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
   function loadAI(){
@@ -309,7 +317,7 @@ a.ib{color:inherit;text-decoration:none}
   function aiGet(i){
     if (i >= items.length) return null;
     if (!aiCache[i]) {
-      var p = aiQ.then(function(){ return piper.predict({ text: clean(items[i].t), voiceId: VID }); }).then(function(b){ return URL.createObjectURL(b); });
+      var p = aiQ.then(function(){ return piper.predict({ text: clean(items[i].t), voiceId: VID, speakerId: SPK }); }).then(function(b){ return URL.createObjectURL(b); });
       aiQ = p.catch(function(){});
       aiCache[i] = p;
     }
@@ -318,7 +326,7 @@ a.ib{color:inherit;text-decoration:none}
   function aiTrim(i){
     Object.keys(aiCache).forEach(function(k){ k = +k; if (k < i - 1 || k > i + 6) { aiCache[k].then(function(u){ URL.revokeObjectURL(u); }, function(){}); delete aiCache[k]; } });
   }
-  function useAI(){ return cfg.engine === "ai"; }
+  function useAI(){ return cfg.engine !== "may"; }
 
   function speakFrom(i){
     if (useAI()) {
@@ -444,7 +452,7 @@ a.ib{color:inherit;text-decoration:none}
   $("setBtn").onclick = function(){ openM("mSet"); };
   $("spd").onclick = function(){ cfg.rate = cfg.rate >= 2.5 ? 0.8 : Math.min(2.5, Math.round((cfg.rate + 0.2) * 10) / 10); saveCfg(); spdLabel(); if (useAI()) { try { aud.playbackRate = cfg.rate; } catch(e){} } else if (playing) speakFrom(readIdx >= 0 ? readIdx : pages[cur].first); };
   $("rate").oninput = function(){ cfg.rate = parseFloat(this.value); saveCfg(); spdLabel(); try { aud.playbackRate = cfg.rate; } catch(e){} };
-  $("engine").onchange = function(){ var was = playing, at = readIdx >= 0 ? readIdx : pages[cur].first; stopSpeech(); cfg.engine = this.value; saveCfg(); showEngine(); if (useAI()) loadAI().catch(function(){}); if (was) speakFrom(at); };
+  $("engine").onchange = function(){ var was = playing, at = readIdx >= 0 ? readIdx : pages[cur].first; stopSpeech(); cfg.engine = this.value; saveCfg(); setVoice(); showEngine(); if (useAI()) loadAI().catch(function(){}); if (was) speakFrom(at); };
   $("rate").onchange = function(){ if (playing && !useAI()) speakFrom(readIdx >= 0 ? readIdx : pages[cur].first); };
   $("voice").onchange = function(){ cfg.voice = this.value; saveCfg(); if (playing) speakFrom(readIdx >= 0 ? readIdx : pages[cur].first); };
   $("fsM").onclick = function(){ cfg.fs = Math.max(14, cfg.fs - 1); $("fsV").textContent = cfg.fs; saveCfg(); relayout(); };
@@ -467,7 +475,12 @@ a.ib{color:inherit;text-decoration:none}
 
   /* ---------- khởi động ---------- */
   $("ttl").textContent = B.title + " — " + B.sub; document.title = B.title + " — Trạm AI Việt";
-  $("fsV").textContent = cfg.fs; $("engine").value = cfg.engine; showEngine();
+  $("fsV").textContent = cfg.fs; (function(){ var sel = $("engine"), gs = { "Giọng nữ": [], "Giọng nam": [] };
+    VOICES.forEach(function(v){ (/^Nữ/.test(v[0]) ? gs["Giọng nữ"] : gs["Giọng nam"]).push(v); });
+    Object.keys(gs).forEach(function(g){ var og = document.createElement("optgroup"); og.label = g; gs[g].forEach(function(v){ var o = document.createElement("option"); o.value = v[1] + ":" + v[2]; o.textContent = v[0]; og.appendChild(o); }); sel.appendChild(og); });
+    var o = document.createElement("option"); o.value = "may"; o.textContent = "Giọng có sẵn của máy"; sel.appendChild(o);
+  })();
+  setVoice(); $("engine").value = cfg.engine; showEngine();
   if (useAI()) import(PIPER).then(function(m){ piper = m; return m.stored(); }).then(function(s){ if (s && s.indexOf(VID) >= 0) { aiLoading = Promise.resolve(); aiReady = true; } }).catch(function(){});
   tg("tgSerif", "serif"); tg("tgAuto", "auto"); tg("tgAnim", "anim");
   buildSw(); buildToc(); spdLabel();
