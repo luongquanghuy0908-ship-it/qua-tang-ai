@@ -240,8 +240,9 @@ a.ib{color:inherit;text-decoration:none}
     if (!window.St || !St.PageFlip) { fallback = true; return; }
     pf = new St.PageFlip(bk, { width: W, height: H, size: "fixed", usePortrait: true, showCover: false, drawShadow: true,
       maxShadowOpacity: 0.45, flippingTime: 900, mobileScrollSupport: false, disableFlipByClick: true, clickEventForward: true,
-      showPageCorners: true, startPage: cur, autoSize: false, swipeDistance: 20 });
+      showPageCorners: true, startPage: 0, autoSize: false, swipeDistance: 20 });
     pf.loadFromHTML(bk.querySelectorAll(".pg"));
+    if (cur > 0) { silent = true; try { pf.turnToPage(cur); } catch(e){} silent = false; }
     pf.on("flip", function(e){
       if (silent) return;
       var n = e.data, byCode = fromCode; fromCode = false;
@@ -272,7 +273,17 @@ a.ib{color:inherit;text-decoration:none}
     var busyNow = false; try { busyNow = pf.getState && pf.getState() !== "read"; } catch(e){}
     flipDone = done || null; fromCode = true;
     if (!cfg.anim || busyNow || Math.abs(n - cur) > 1) (function(){ silent = true; try { pf.turnToPage(n); } catch(e){} silent = false; var f = flipDone; flipDone = null; fromCode = false; cur = n; paint(); if (f) f(); })();
-    else pf.flip(n, n > cur ? "bottom" : "top");
+    else {
+      /* thư viện page-flip 2.0.7 bỏ qua lật lùi khi tắt "lật bằng chạm", nên bật tạm lúc gọi */
+      var stg = pf.getSettings(); stg.disableFlipByClick = false;
+      try { if (n > cur) pf.flipNext("bottom"); else pf.flipPrev("top"); } finally { stg.disableFlipByClick = true; }
+      /* đôi khi thư viện không chịu lật (ví dụ lần đầu sau khi mở lại đúng trang cũ) → chuyển trang thẳng */
+      var want = n;
+      setTimeout(function(){
+        var st = "read"; try { st = pf.getState(); } catch(e){}
+        if (st === "read" && cur !== want && flipDone) { var f = flipDone; flipDone = null; fromCode = false; silent = true; try { pf.turnToPage(want); } catch(e){} silent = false; cur = want; paint(); f(); }
+      }, 250);
+    }
   }
   function manualGo(n){
     if (n < 0 || n >= pages.length) return;
