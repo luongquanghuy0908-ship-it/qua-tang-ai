@@ -36,7 +36,7 @@ html,body{margin:0}
 body{
   background:radial-gradient(900px 420px at 88% -6%,rgba(155,108,255,.30),transparent 70%),radial-gradient(800px 380px at 0% 0%,rgba(0,245,212,.16),transparent 65%),var(--ground);background-attachment:fixed;color:var(--ink);
   font:400 16px/1.6 "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  padding-bottom:calc(84px + env(safe-area-inset-bottom,0px));
+  padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
 }
 
 a{color:inherit}
@@ -126,8 +126,12 @@ h1 mark::after{content:"";position:absolute;left:0;right:0;bottom:.02em;height:.
 .contact-note{margin:8px 0 22px;font-size:13.5px;color:var(--ink-soft);line-height:1.45}
 footer .contact-note{text-align:center;margin:0 0 16px}
 .contact-note b{color:var(--zalo);font-weight:700}
-.contact-bar{width:100%;max-width:1080px;margin:0 auto;flex-wrap:nowrap}
-.contact-bar a{flex:1;padding:12px 8px;font-size:15px}
+#bar.bar{left:auto;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));width:auto;padding:0;background:none;border:0;backdrop-filter:none}
+#bar .inner{max-width:none;margin:0;display:block}
+.contact-bar{flex-direction:column;align-items:flex-end;gap:10px;width:auto;margin:0;flex-wrap:nowrap}
+.contact-bar a{position:relative;flex:none;width:52px;height:52px;padding:0;border-radius:50%;box-shadow:0 6px 18px rgba(0,0,0,.45)}
+.contact-bar a svg{width:26px;height:26px}
+.contact-bar a span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .top{flex-wrap:wrap}
 
 /* reward */
@@ -335,7 +339,7 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     ["zalo","yt","tg"].forEach(function(k){
       if (!CONTACT[k]) return;
       var a = document.createElement("a");
-      a.className = "c-" + k; a.href = CONTACT[k]; a.target = "_blank"; a.rel = "noopener";
+      a.className = "c-" + k; a.setAttribute("aria-label", LABEL[k]); a.title = LABEL[k]; a.href = CONTACT[k]; a.target = "_blank"; a.rel = "noopener";
       a.innerHTML = ICON[k] + "<span>" + LABEL[k] + "</span>";
       box.appendChild(a);
     });
