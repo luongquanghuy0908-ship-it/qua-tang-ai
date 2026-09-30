@@ -504,9 +504,21 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
   }
 
   var KEY = "tav_khach_v1";
-  function saveMe(d){ try { localStorage.setItem(KEY, JSON.stringify({ name:d.name, phone:d.phone, mail:d.mail, t:Date.now() })); } catch(e){} }
-  function loadMe(){ try { var j = JSON.parse(localStorage.getItem(KEY) || "null"); return j && j.name && j.phone ? j : null; } catch(e){ return null; } }
-  function forgetMe(){ try { localStorage.removeItem(KEY); } catch(e){} }
+  function saveMe(d){
+    var v = JSON.stringify({ name:d.name, phone:d.phone, mail:d.mail, t:Date.now() });
+    try { localStorage.setItem(KEY, v); } catch(e){}
+    try { document.cookie = KEY + "=" + encodeURIComponent(v) + "; max-age=31536000; path=/; SameSite=Lax"; } catch(e){}
+  }
+  function loadMe(){
+    var raw = null;
+    try { raw = localStorage.getItem(KEY); } catch(e){}
+    if (!raw) { try { var m = document.cookie.match(new RegExp("(?:^|; )" + KEY + "=([^;]*)")); if (m) raw = decodeURIComponent(m[1]); } catch(e){} }
+    try { var j = JSON.parse(raw || "null"); return j && j.name && j.phone ? j : null; } catch(e){ return null; }
+  }
+  function forgetMe(){
+    try { localStorage.removeItem(KEY); } catch(e){}
+    try { document.cookie = KEY + "=; max-age=0; path=/; SameSite=Lax"; } catch(e){}
+  }
   document.getElementById("forgetBtn").addEventListener("click", function(){ forgetMe(); location.href = location.pathname + location.search; });
 
   function unlock(name, quiet){
@@ -549,6 +561,7 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     e.preventDefault();
     var data = validate();
     if (!data) { var bad = form.querySelector('[aria-invalid="true"]'); if (bad) bad.focus(); return; }
+    saveMe(data);
     btn.disabled = true;
     btn.firstChild.textContent = "Đang mở khoá… ";
     send(data).then(function(){
