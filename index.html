@@ -237,10 +237,25 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
 #submitBtn svg{transition:transform .2s}
 #submitBtn:hover svg{transform:translateX(4px)}
 @media (prefers-reduced-motion:reduce){.card:before,#submitBtn:before,.card .live .dot{animation:none}}
+
+/* --- kho quà kiểu thành phố tương lai --- */
+.city-on{background:transparent!important}
+.city-on .tile{position:relative;overflow:hidden;background:linear-gradient(160deg,rgba(18,30,70,.55),rgba(8,14,38,.72));backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);border:1px solid rgba(0,245,212,.28);box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 0 30px rgba(0,245,212,.05);transition:transform .25s ease,border-color .25s,box-shadow .25s}
+.city-on .tile:before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,#00F5D4,#7C5CFF,#FF2E93,transparent);opacity:.85}
+.city-on .tile:after{content:"";position:absolute;top:-50%;left:-80%;width:50%;height:200%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.12),transparent);transform:rotate(12deg);transition:left .7s ease}
+.city-on .tile:hover{transform:translateY(-4px) perspective(800px) rotateX(3deg);border-color:#00F5D4;box-shadow:0 18px 40px rgba(0,0,0,.45),0 0 26px rgba(0,245,212,.35),inset 0 0 30px rgba(0,245,212,.08)}
+.city-on .tile:hover:after{left:130%}
+.city-on .tile .kind{background:rgba(0,245,212,.12);border:1px solid rgba(0,245,212,.4);box-shadow:0 0 12px rgba(0,245,212,.25);font-family:"Space Mono",ui-monospace,Consolas,monospace}
+.city-on .tile h3{text-shadow:0 0 18px rgba(0,245,212,.25)}
+.city-on .reward h2{text-shadow:0 0 30px rgba(124,92,255,.45)}
+.city-on .lib-view,.city-on .lib-empty{background:linear-gradient(160deg,rgba(18,30,70,.6),rgba(8,14,38,.8));backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-color:rgba(0,245,212,.28)}
+@media (prefers-reduced-motion:reduce){.city-on .tile:after{display:none}}
 </style>
 </head>
 <body>
 <script src="intro.js"></script>
+<script src="city.js" defer></script>
+<script src="city3d.js" defer></script>
 
 <div class="wrap">
   <header class="top">
@@ -569,6 +584,7 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     var r = document.getElementById("reward");
     r.hidden = false;
     Lib.start();
+    try { if (window.TavCity) TavCity.start(); else addEventListener("load", function(){ window.TavCity && TavCity.start(); }); } catch(e){}
     ["after"].forEach(function(id){ document.getElementById(id).hidden = false; });
     document.getElementById("who").hidden = false;
     if (!quiet) r.scrollIntoView({ behavior:"smooth", block:"start" });
