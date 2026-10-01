@@ -208,6 +208,35 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @keyframes pop{from{transform:translateY(8px);opacity:.4}to{transform:none;opacity:1}}
 .reward:not([hidden]){animation:pop .4s ease-out}
+
+/* --- form đẹp hơn --- */
+.card{isolation:isolate;overflow:hidden;background:linear-gradient(160deg,rgba(18,42,77,.92),rgba(10,25,47,.95));backdrop-filter:blur(8px)}
+.card:before{content:"";position:absolute;inset:-2px;z-index:-2;border-radius:22px;background:conic-gradient(from var(--ang,0deg),#00F5D4,#7C5CFF,#FF2E93,#00F5D4);animation:cardSpin 6s linear infinite}
+.card:after{content:"";position:absolute;inset:1.5px;z-index:-1;border-radius:19px;background:linear-gradient(160deg,#13305a,#0b1c38 70%);background-image:linear-gradient(rgba(0,245,212,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,212,.05) 1px,transparent 1px),linear-gradient(160deg,#13305a,#0b1c38 70%);background-size:22px 22px,22px 22px,auto}
+@property --ang{syntax:"<angle>";inherits:false;initial-value:0deg}
+@keyframes cardSpin{to{--ang:360deg}}
+.card .live{display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;padding:5px 12px;border-radius:999px;background:rgba(0,245,212,.1);border:1px solid rgba(0,245,212,.35);color:#7CFFE9;font-size:12.5px;font-weight:700;letter-spacing:.02em}
+.card .live .dot{width:8px;height:8px;border-radius:50%;background:#00F5D4;box-shadow:0 0 0 0 rgba(0,245,212,.7);animation:livePing 1.6s infinite}
+@keyframes livePing{70%{box-shadow:0 0 0 8px rgba(0,245,212,0)}100%{box-shadow:0 0 0 0 rgba(0,245,212,0)}}
+.card h2{background:linear-gradient(90deg,#fff,#9FFFEF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.field label{font-size:13.5px;letter-spacing:.02em;color:#cfe0f5}
+.inp{position:relative}
+.inp svg{position:absolute;left:14px;top:50%;width:20px;height:20px;margin-top:-10px;fill:none;stroke:#6f8fbf;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s,filter .2s;pointer-events:none}
+.field .inp input{padding-left:46px;border-radius:12px;background:rgba(6,18,46,.75);border-color:rgba(91,130,190,.45);transition:border-color .2s,box-shadow .2s,background .2s}
+.field .inp input:hover{border-color:rgba(0,245,212,.5)}
+.field .inp input:focus{background:rgba(8,28,62,.95);border-color:#00F5D4;box-shadow:0 0 0 3px rgba(0,245,212,.18),0 0 22px rgba(0,245,212,.25)}
+.inp:focus-within svg{stroke:#00F5D4;filter:drop-shadow(0 0 6px rgba(0,245,212,.7))}
+.field .inp input:not(:placeholder-shown):valid{border-color:rgba(124,255,155,.55)}
+.consent input{appearance:none;-webkit-appearance:none;border-radius:7px;border:1.5px solid rgba(91,130,190,.7);background:rgba(6,18,46,.75);display:grid;place-items:center;transition:all .2s}
+.consent input:checked{background:linear-gradient(135deg,#00F5D4,#7CF0FF);border-color:#00F5D4;box-shadow:0 0 12px rgba(0,245,212,.5)}
+.consent input:checked:after{content:"";width:6px;height:11px;border:solid #06122E;border-width:0 2.5px 2.5px 0;transform:translateY(-1px) rotate(45deg)}
+.consent input:focus-visible{outline:2px solid #00F5D4;outline-offset:2px}
+#submitBtn{position:relative;overflow:hidden;border-radius:14px;letter-spacing:.01em;box-shadow:0 0 0 1px rgba(255,255,255,.15) inset,0 10px 30px rgba(0,245,212,.35)}
+#submitBtn:before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:btnShine 2.8s ease-in-out infinite}
+@keyframes btnShine{0%,60%{left:-60%}100%{left:130%}}
+#submitBtn svg{transition:transform .2s}
+#submitBtn:hover svg{transform:translateX(4px)}
+@media (prefers-reduced-motion:reduce){.card:before,#submitBtn:before,.card .live .dot{animation:none}}
 </style>
 </head>
 <body>
@@ -243,22 +272,23 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
     </div>
 
     <form class="card" id="leadForm" novalidate>
+      <div class="live"><span class="dot"></span>Đang mở · 3 quà miễn phí</div>
       <h2>Nhận tool miễn phí ngay</h2>
       <p class="sub">Mất chưa tới 30 giây. Quà hiện ra ngay trên trang này.</p>
 
       <div class="field">
         <label for="f-name">Họ và tên</label>
-        <input id="f-name" name="name" type="text" autocomplete="name" placeholder="Nguyễn Văn A" required>
+        <div class="inp"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><input id="f-name" name="name" type="text" autocomplete="name" placeholder="Nguyễn Văn A" required></div>
         <div class="msg" id="m-name"></div>
       </div>
       <div class="field">
         <label for="f-phone">Số điện thoại (Zalo)</label>
-        <input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required>
+        <div class="inp"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg><input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required></div>
         <div class="msg" id="m-phone"></div>
       </div>
       <div class="field">
         <label for="f-mail">Gmail</label>
-        <input id="f-mail" name="mail" type="email" inputmode="email" autocomplete="email" placeholder="ban@gmail.com" required>
+        <div class="inp"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><input id="f-mail" name="mail" type="email" inputmode="email" autocomplete="email" placeholder="ban@gmail.com" required></div>
         <div class="msg" id="m-mail"></div>
       </div>
 
