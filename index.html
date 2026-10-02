@@ -254,6 +254,7 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
 <body>
 <script src="intro.js"></script>
 <script src="sea.js" defer></script>
+<script src="sach/danh-sach.js"></script>
 
 <div class="wrap">
   <header class="top">
@@ -444,6 +445,22 @@ footer{padding-block:24px;color:var(--ink-soft);font-size:13px;text-align:center
         if (!n.parent) roots.push(n);
         else if (nodes[n.parent]) nodes[n.parent].kids.push(n);
       });
+      /* sách tự động: lấy từ sach/danh-sach.js, gắn vào ô "Sách yêu thích" nếu ô đó có và chưa có link trùng */
+      try {
+        var host = nodes["sach-yeu-thich"];
+        if (host && window.TAV_SACH) {
+          function key(u){ var m = String(u || "").match(/\/sach\/(?:\?b=([a-z0-9-]+))?\s*$/); return m ? (m[1] || "luat-hap-dan") : ""; }
+          var have = {}; host.kids.forEach(function(k){ var q = key(k.val); if (q) have[q] = 1; });
+          window.TAV_SACH.forEach(function(b, i){
+            if (have[b.id]) return;
+            var base = new URL("sach/", location.href).href;
+            var url = b.id === "luat-hap-dan" ? base : base + "?b=" + b.id;
+            var id = "auto-sach-" + b.id;
+            nodes[id] = { id:id, parent:"sach-yeu-thich", type:"link", title:b.title, desc:b.desc || "", val:url, ord:100 + i, kids:[] };
+            host.kids.push(nodes[id]);
+          });
+        }
+      } catch (e) {}
       function byOrd(a, b){ return a.ord - b.ord; }
       roots.sort(byOrd);
       Object.keys(nodes).forEach(function(id){ nodes[id].kids.sort(byOrd); });
